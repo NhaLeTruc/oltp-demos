@@ -208,11 +208,11 @@ All paths are from repository root:
 
 #### Isolation Level Demonstrations
 
-- [ ] T092 [P] [US2] Create IsolationLevelService in src/main/java/com/oltp/demo/service/concurrency/IsolationLevelService.java
-- [ ] T093 [US2] Implement dirty read demonstration with READ_UNCOMMITTED in IsolationLevelService
-- [ ] T094 [US2] Implement non-repeatable read demonstration with READ_COMMITTED in IsolationLevelService
-- [ ] T095 [US2] Implement phantom read demonstration with REPEATABLE_READ in IsolationLevelService
-- [ ] T096 [US2] Implement full isolation with SERIALIZABLE in IsolationLevelService
+- [X] T092 [P] [US2] Create IsolationLevelService in src/main/java/com/oltp/demo/service/concurrency/IsolationLevelService.java
+- [X] T093 [US2] Implement dirty read demonstration with READ_UNCOMMITTED in IsolationLevelService
+- [X] T094 [US2] Implement non-repeatable read demonstration with READ_COMMITTED in IsolationLevelService
+- [X] T095 [US2] Implement phantom read demonstration with REPEATABLE_READ in IsolationLevelService
+- [X] T096 [US2] Implement full isolation with SERIALIZABLE in IsolationLevelService
 
 #### REST API Endpoints
 
@@ -220,14 +220,14 @@ All paths are from repository root:
 - [X] T098 [US2] Implement POST /api/demos/concurrency/optimistic-locking endpoint in ConcurrencyDemoController
 - [X] T099 [US2] Implement POST /api/demos/concurrency/pessimistic-locking endpoint in ConcurrencyDemoController
 - [X] T100 [US2] Implement POST /api/demos/concurrency/deadlock endpoint in ConcurrencyDemoController
-- [ ] T101 [US2] Implement GET /api/demos/concurrency/isolation-levels endpoint in ConcurrencyDemoController
+- [X] T101 [US2] Implement GET /api/demos/concurrency/isolation-levels endpoint in ConcurrencyDemoController
 
 #### Integration Tests
 
 - [X] T102 [P] [US2] Create OptimisticLockingTest in src/test/java/com/oltp/demo/integration/concurrency/OptimisticLockingTest.java
 - [X] T103 [P] [US2] Create PessimisticLockingTest in src/test/java/com/oltp/demo/integration/concurrency/PessimisticLockingTest.java
 - [X] T104 [P] [US2] Create DeadlockTest in src/test/java/com/oltp/demo/integration/concurrency/DeadlockTest.java
-- [ ] T105 [P] [US2] Create ConcurrentAccessTest in src/test/java/com/oltp/demo/integration/concurrency/ConcurrentAccessTest.java with 100+ parallel clients using ExecutorService
+- [X] T105 [P] [US2] Create ConcurrentAccessTest in src/test/java/com/oltp/demo/integration/concurrency/ConcurrentAccessTest.java with 100+ parallel clients using ExecutorService
 
 #### Documentation
 
