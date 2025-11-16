@@ -1,0 +1,125 @@
+@startuml OLTP Demo - Deployment Architecture
+
+!theme plain
+skinparam componentStyle rectangle
+
+title Docker Compose Deployment Architecture
+
+node "Docker Host" {
+
+    package "Application Network (oltp-network)" {
+
+        component "Spring Boot App" as App <<container: openjdk:17>> {
+            [Application Server\nPort: 8080]
+            [Actuator Endpoints\n/actuator/*]
+            [Demo APIs\n/api/demos/*]
+        }
+
+        database "PostgreSQL 15" as PG <<container: postgres:15>> {
+            [PostgreSQL Server\nPort: 5432]
+            [Database: oltpdemo]
+            folder "Data" {
+                [users]
+                [accounts]
+                [transactions]
+                [transfer_logs]
+            }
+            folder "pg_wal" {
+                [WAL Files]
+            }
+        }
+
+        database "Redis" as Redis <<container: redis:7>> {
+            [Redis Server\nPort: 6379]
+            [Session Cache]
+            [Query Cache]
+        }
+
+        component "Prometheus" as Prom <<container: prom/prometheus>> {
+            [Prometheus Server\nPort: 9090]
+            [Time-series DB]
+            [Scrape Jobs]
+        }
+
+        component "Grafana" as Grafana <<container: grafana/grafana>> {
+            [Grafana Server\nPort: 3000]
+            [Dashboards]
+            [Data Sources]
+        }
+
+        component "Jaeger" as Jaeger <<container: jaegertracing/all-in-one>> {
+            [Jaeger Collector\nPort: 14268]
+            [Jaeger UI\nPort: 16686]
+            [Jaeger Query\nPort: 16687]
+        }
+    }
+
+    folder "Volumes" {
+        folder "postgres-data" as PGData
+        folder "prometheus-data" as PromData
+        folder "grafana-data" as GrafanaData
+    }
+}
+
+cloud "External" {
+    actor Developer as Dev
+    actor "Load Tester" as LoadTest
+}
+
+' Application connections
+App --> PG : JDBC\n(HikariCP pool)
+App --> Redis : Redis protocol
+App ..> Jaeger : Traces\n(OpenTelemetry)
+
+' Monitoring connections
+Prom --> App : Scrape /actuator/prometheus\nevery 5s
+Grafana --> Prom : PromQL queries
+Grafana --> PG : SQL queries\n(dashboard data)
+
+' Volume mounts
+PG --> PGData : Persist database
+Prom --> PromData : Persist metrics
+Grafana --> GrafanaData : Persist dashboards
+
+' External access
+Dev --> App : HTTP :8080\ncurl /api/*
+Dev --> Grafana : HTTP :3000\nView dashboards
+Dev --> Prom : HTTP :9090\nPromQL queries
+Dev --> Jaeger : HTTP :16686\nView traces
+Dev --> PG : psql :5432\nDirect DB access
+
+LoadTest --> App : ab, Gatling\nLoad testing
+
+note right of App
+  **Configuration**:
+  - Heap: 512MB-1GB
+  - Threads: 200
+  - Connection pool: 20
+  - Restart: always
+end note
+
+note right of PG
+  **Configuration**:
+  - max_connections: 200
+  - shared_buffers: 256MB
+  - effective_cache_size: 1GB
+  - wal_level: replica
+  - fsync: on
+end note
+
+note right of Prom
+  **Retention**:
+  - 15 days of metrics
+  - 5s scrape interval
+  - 30s evaluation interval
+end note
+
+note bottom of "oltp-network"
+  **Network**:
+  - Name: oltp-network
+  - Driver: bridge
+  - Internal DNS resolution
+  - No exposed ports by default
+end note
+
+@enduml

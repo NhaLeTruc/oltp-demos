@@ -1,0 +1,156 @@
+@startuml OLTP Demo - Architecture Overview
+
+!define RECTANGLE_COLOR #4A90E2
+!define DATABASE_COLOR #50C878
+!define CACHE_COLOR #FFB84D
+!define MONITORING_COLOR #9B59B6
+
+skinparam componentStyle rectangle
+skinparam backgroundColor #FAFAFA
+skinparam defaultFontName Arial
+
+title OLTP Core Capabilities Demo - Architecture Overview
+
+' Client Layer
+package "Client Layer" {
+    [Web Browser / curl] as Client
+}
+
+' Application Layer
+package "Application Layer" <<RECTANGLE_COLOR>> {
+    package "Controllers" {
+        [DemoControllers\n(ACID, Concurrency, etc.)] as Controllers
+        [AccountController] as AccCtrl
+    }
+
+    package "Services" {
+        package "Demo Services" {
+            [AtomicityDemoService] as Atomicity
+            [ConsistencyDemoService] as Consistency
+            [IsolationDemoService] as Isolation
+            [DurabilityDemoService] as Durability
+            [OptimisticLockingService] as OptLock
+            [PessimisticLockingService] as PessLock
+            [DeadlockDemoService] as Deadlock
+        }
+        [AccountService] as AccSvc
+    }
+
+    package "Repositories" {
+        [Spring Data JPA] as JPA
+        [jOOQ Repositories] as jOOQ
+    }
+
+    package "Cross-Cutting" {
+        [CorrelationIdFilter] as CorrFilter
+        [GlobalExceptionHandler] as ExHandler
+        [MetricsHelper] as Metrics
+    }
+}
+
+' Data Layer
+package "Data Layer" <<DATABASE_COLOR>> {
+    database "PostgreSQL 15+" {
+        [users]
+        [accounts]
+        [transactions]
+        [transfer_logs]
+        [account_types]
+        [sessions]
+    }
+
+    database "Redis" <<CACHE_COLOR>> {
+        [Session Cache]
+        [Query Cache]
+    }
+}
+
+' Observability Layer
+package "Observability" <<MONITORING_COLOR>> {
+    [Prometheus\n(Metrics)] as Prom
+    [Grafana\n(Dashboards)] as Grafana
+    [Jaeger\n(Tracing)] as Jaeger
+    [Structured Logs\n(JSON)] as Logs
+}
+
+' Infrastructure
+package "Infrastructure" {
+    [HikariCP\nConnection Pool] as HikariCP
+    [Flyway\nMigrations] as Flyway
+    [Spring Boot\nActuator] as Actuator
+}
+
+' Relationships - Client to Controllers
+Client --> Controllers : HTTP/REST
+Client --> AccCtrl : HTTP/REST
+
+' Controllers to Services
+Controllers --> Atomicity
+Controllers --> Consistency
+Controllers --> Isolation
+Controllers --> Durability
+Controllers --> OptLock
+Controllers --> PessLock
+Controllers --> Deadlock
+AccCtrl --> AccSvc
+
+' Services to Repositories
+Atomicity --> JPA
+Consistency --> JPA
+Isolation --> JPA
+Durability --> JPA
+OptLock --> JPA
+PessLock --> JPA
+Deadlock --> JPA
+AccSvc --> JPA
+
+' Advanced demos use jOOQ
+Isolation --> jOOQ : (Advanced queries)
+Durability --> jOOQ : (WAL queries)
+
+' Repositories to Data
+JPA --> HikariCP
+jOOQ --> HikariCP
+HikariCP --> "PostgreSQL 15+"
+
+' Caching
+JPA --> "Redis" : (Optional)
+
+' Migrations
+Flyway --> "PostgreSQL 15+"
+
+' Cross-cutting
+CorrFilter ..> Controllers : MDC
+ExHandler ..> Controllers : Exception handling
+Metrics ..> Services : Custom metrics
+
+' Observability
+Actuator --> Prom : /actuator/prometheus
+Prom --> Grafana : Data source
+Services ..> Jaeger : Traces
+Controllers ..> Logs : Structured logging
+
+note right of "PostgreSQL 15+"
+  **Features**:
+  - Full ACID compliance
+  - All isolation levels
+  - MVCC with SSI
+  - Advanced constraints
+  - Rich monitoring
+end note
+
+note right of "HikariCP\nConnection Pool"
+  **Configuration**:
+  - maximum-pool-size: 20
+  - connection-timeout: 30s
+  - Leak detection enabled
+end note
+
+note bottom of "Observability"
+  **Complete Stack**:
+  - Metrics: Micrometer → Prometheus → Grafana
+  - Traces: OpenTelemetry → Jaeger
+  - Logs: Logback → JSON → stdout
+end note
+
+@enduml

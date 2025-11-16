@@ -1,0 +1,155 @@
+@startuml OLTP Demo - Transfer Transaction Flow
+
+!theme plain
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+skinparam maxMessageSize 100
+skinparam sequenceParticipant underline
+
+title Transfer Transaction - Data Flow (Atomicity Demonstration)
+
+actor Client
+participant "Account\nController" as Ctrl
+participant "Atomicity\nDemoService" as Service
+participant "Account\nRepository" as Repo
+participant "HikariCP" as Pool
+database "PostgreSQL" as DB
+participant "Prometheus" as Metrics
+participant "Jaeger" as Traces
+
+== Request Initiation ==
+
+Client -> Ctrl: POST /api/demos/acid/atomicity/transfer\n{fromAccountId:1, toAccountId:2, amount:100}
+activate Ctrl
+
+Ctrl -> Ctrl: Generate/Extract\nCorrelation ID
+Ctrl -> Ctrl: Set MDC context
+
+Ctrl -> Service: transfer(1, 2, 100.00)
+activate Service
+
+== Transaction Boundary ==
+
+Service -> Service: @Transactional\nBEGIN TRANSACTION
+note right: Spring starts\ntransaction here
+
+== Data Access ==
+
+Service -> Repo: findById(1)
+activate Repo
+
+Repo -> Pool: getConnection()
+activate Pool
+Pool -> Pool: Check pool\n(< 30ms)
+Pool --> Repo: Connection
+deactivate Pool
+
+Repo -> DB: SELECT * FROM accounts\nWHERE id = 1
+activate DB
+DB --> Repo: Account(id=1, balance=1000)
+deactivate DB
+Repo --> Service: Account A
+deactivate Repo
+
+Service -> Repo: findById(2)
+activate Repo
+Repo -> Pool: getConnection()\n(reuse same)
+activate Pool
+Pool --> Repo: Same connection
+deactivate Pool
+Repo -> DB: SELECT * FROM accounts\nWHERE id = 2
+activate DB
+DB --> Repo: Account(id=2, balance=500)
+deactivate DB
+Repo --> Service: Account B
+deactivate Repo
+
+== Business Logic ==
+
+Service -> Service: Validate:\nbalance_A >= amount\n✓ 1000 >= 100
+
+Service -> Service: accountA.debit(100)\naccountB.credit(100)
+
+note over Service
+  In-memory modifications:
+  - accountA.balance = 900
+  - accountB.balance = 600
+  - accountA.version++
+  - accountB.version++
+end note
+
+== Persistence ==
+
+Service -> Repo: save(accountA)
+activate Repo
+Repo -> DB: UPDATE accounts\nSET balance=900, version=2\nWHERE id=1 AND version=1
+activate DB
+DB --> Repo: 1 row updated
+deactivate DB
+Repo --> Service: Updated Account A
+deactivate Repo
+
+Service -> Repo: save(accountB)
+activate Repo
+Repo -> DB: UPDATE accounts\nSET balance=600, version=2\nWHERE id=2 AND version=1
+activate DB
+DB --> Repo: 1 row updated
+deactivate DB
+Repo --> Service: Updated Account B
+deactivate Repo
+
+== Audit Trail ==
+
+Service -> Repo: saveTransferLog(...)
+activate Repo
+Repo -> DB: INSERT INTO transfer_logs\n(transaction_id, from_balance_before, ...)
+activate DB
+DB --> Repo: Log created
+deactivate DB
+Repo --> Service: TransferLog
+deactivate Repo
+
+== Commit ==
+
+Service -> Service: @Transactional\nCOMMIT
+Service -> DB: COMMIT
+activate DB
+note right DB
+  PostgreSQL:
+  1. Write to WAL
+  2. Fsync WAL
+  3. Return success
+  4. Apply changes async
+end note
+DB --> Service: Success
+deactivate DB
+
+Service --> Ctrl: TransferResult(success=true)
+deactivate Service
+
+== Observability ==
+
+Ctrl -> Metrics: counter("transfer.success").increment()
+Ctrl -> Metrics: timer("transfer.duration").record(25ms)
+Ctrl -> Traces: span.end(status=OK)
+
+Ctrl --> Client: 200 OK\n{success:true, transactionId:42}
+deactivate Ctrl
+
+== Metrics Collection ==
+
+Metrics -> Metrics: Aggregate metrics
+note right: Every 5 seconds
+
+Client -> Metrics: GET /actuator/prometheus
+Metrics --> Client: Metrics in Prometheus format
+
+note over Client, DB
+  **Transaction Properties Demonstrated**:
+  - **Atomicity**: Both updates or neither (all-or-nothing)
+  - **Consistency**: Constraints checked (balance >= 0)
+  - **Isolation**: Other transactions don't see intermediate state
+  - **Durability**: WAL ensures persistence after COMMIT
+end note
+
+@enduml
