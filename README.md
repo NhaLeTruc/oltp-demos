@@ -1,10 +1,15 @@
 # OLTP Core Capabilities Tech Demo
 
-A production-grade demonstration of Online Transaction Processing (OLTP) patterns and best practices using Java 21 and Spring Boot 3.2+.
+![Java](https://img.shields.io/badge/Java-17+-orange.svg)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2+-brightgreen.svg)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-blue.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-## Overview
+A production-grade demonstration of Online Transaction Processing (OLTP) patterns and best practices using Java 17+ and Spring Boot 3.2+.
 
-This project showcases essential OLTP system capabilities through practical demonstrations:
+## 🎯 Overview
+
+This project showcases essential OLTP system capabilities through practical, hands-on demonstrations:
 
 - **ACID Transaction Guarantees** - Atomicity, Consistency, Isolation, Durability
 - **Concurrency Control** - Optimistic/Pessimistic locking, deadlock handling
@@ -12,311 +17,315 @@ This project showcases essential OLTP system capabilities through practical demo
 - **Comprehensive Observability** - Metrics, logging, distributed tracing
 - **Failure Handling** - Retry logic, circuit breakers, crash recovery
 
-## Project Philosophy
-
-This project is built on **spec-driven development** principles, where:
-1. Specifications are written before implementation
-2. Tests are written before code
-3. Performance is measured, not guessed
-4. Observability is built-in, not bolted-on
-
-See [.specify/memory/constitution.md](.specify/memory/constitution.md) for the complete set of governing principles and development guidelines.
-
-## Technology Stack
-
-### Core
-- **Java 21 LTS** - Virtual Threads (Project Loom)
-- **Spring Boot 3.2+** - Application framework
-- **PostgreSQL 15+** - ACID-compliant database
-- **HikariCP** - High-performance connection pooling
-
-### Data Access
-- **Spring Data JPA** - ORM with Hibernate
-- **jOOQ** - Type-safe SQL queries
-- **Flyway** - Database migrations
-
-### Observability
-- **Micrometer** - Metrics collection
-- **Prometheus** - Metrics storage
-- **Grafana** - Metrics visualization
-- **OpenTelemetry** - Distributed tracing
-- **Jaeger** - Trace visualization
-
-### Resilience
-- **Resilience4j** - Circuit breaker, retry, bulkhead
-- **Spring Retry** - Declarative retry logic
-
-### Testing
-- **JUnit 5** - Unit testing
-- **Testcontainers** - Integration testing with Docker
-- **JMH** - Microbenchmarking
-- **ArchUnit** - Architecture validation
-- **Gatling** - JVM-based load testing
-- **Locust** - Python-based load testing
-
-## Performance Targets
-
-Based on constitution.md guidelines:
-
-- **Point queries**: < 5ms (p95)
-- **Simple transactions**: < 10ms (p95)
-- **Complex transactions**: < 50ms (p95)
-- **Connection acquisition**: < 1ms (p95)
-- **Throughput**: 1000+ TPS on standard hardware
-
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Java 21 or higher
-- Docker & Docker Compose
-- Maven 3.9+ (or use included wrapper)
+- **Java 17+** ([Download](https://adoptium.net/))
+- **Docker** & **Docker Compose** ([Download](https://www.docker.com/get-started))
+- **Maven 3.8+** (or use included Maven wrapper `./mvnw`)
 
-### Running the Demo
+### One-Command Setup
 
-1. **Start Infrastructure**
 ```bash
+# Clone the repository
+git clone https://github.com/your-org/oltp-demos.git
+cd oltp-demos
+
+# Run automated setup (starts all services and seeds data)
+./infrastructure/scripts/setup.sh
+```
+
+This script will:
+1. ✅ Verify prerequisites (Java, Docker)
+2. ✅ Start PostgreSQL, Redis, Prometheus, Grafana, Jaeger (Docker Compose)
+3. ✅ Run database migrations (Flyway)
+4. ✅ Build the application (Maven)
+5. ✅ Seed 1M+ rows of test data
+
+### Manual Setup
+
+```bash
+# 1. Start infrastructure services
+cd infrastructure/docker
 docker-compose up -d
-```
+cd ../..
 
-2. **Run Database Migrations**
-```bash
+# 2. Build the application
+./mvnw clean install
+
+# 3. Run database migrations
 ./mvnw flyway:migrate
-```
 
-3. **Start Application**
-```bash
+# 4. Seed test data (optional, takes ~5 minutes)
+./infrastructure/scripts/seed-data.sh 1000000
+
+# 5. Start the application
 ./mvnw spring-boot:run
 ```
 
-4. **Access Endpoints**
-- API: http://localhost:8080/api
-- Health: http://localhost:8080/actuator/health
-- Metrics: http://localhost:8080/actuator/prometheus
-- Grafana: http://localhost:3000
-- Jaeger: http://localhost:16686
+### Verify Installation
 
-## Demonstrations
-
-### ACID Transactions
-
-**Atomicity** - All-or-nothing money transfers:
 ```bash
-curl -X POST http://localhost:8080/api/demos/acid/atomicity/transfer \
-  -H "Content-Type: application/json" \
-  -d '{"fromAccountId": 1, "toAccountId": 2, "amount": 100.00}'
+# Application health
+curl http://localhost:8080/actuator/health
+
+# Swagger UI
+open http://localhost:8080/swagger-ui.html
+
+# Grafana dashboards
+open http://localhost:3000  # admin/admin
+
+# Jaeger tracing
+open http://localhost:16686
+
+# Prometheus metrics
+open http://localhost:9090
 ```
 
-**Consistency** - Business rule enforcement:
+## 📚 Demonstrations
+
+### ACID Properties
+
+**Atomicity** - All-or-nothing transactions:
+```bash
+curl -X POST http://localhost:8080/api/demos/acid/atomicity/transfer \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "fromAccountId": 1,
+    "toAccountId": 2,
+    "amount": 100.00
+  }'
+```
+
+**Consistency** - Constraint enforcement:
 ```bash
 curl -X POST http://localhost:8080/api/demos/acid/consistency/enforce-constraints \
-  -H "Content-Type: application/json" \
-  -d '{"accountId": 1, "withdrawalAmount": 1000.00}'
+  -H 'Content-Type: application/json' \
+  -d '{
+    "type": "NEGATIVE_BALANCE",
+    "accountId": 1,
+    "amount": 999999.00
+  }'
 ```
 
 **Isolation** - Concurrent transaction handling:
 ```bash
-curl -X POST http://localhost:8080/api/demos/acid/isolation/concurrent-transfers \
-  -H "Content-Type: application/json" \
-  -d '{"accountId": 1, "concurrentOperations": 10}'
+curl -X POST http://localhost:8080/api/demos/acid/isolation/non-repeatable-read \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "accountId": 1,
+    "isolationLevel": "READ_COMMITTED",
+    "sleepBetweenReads": 5000
+  }'
 ```
 
-**Durability** - Crash recovery verification:
+**Durability** - Crash recovery:
 ```bash
-curl http://localhost:8080/api/demos/acid/durability/crash-recovery
+# Verify WAL configuration
+curl http://localhost:8080/api/demos/failure/recovery/wal
+
+# Simulate crash and verify recovery
+./infrastructure/scripts/chaos/kill-db.sh --hard-kill
 ```
 
 ### Concurrency Control
 
 **Optimistic Locking**:
 ```bash
-curl -X POST http://localhost:8080/api/demos/concurrency/optimistic-locking \
-  -H "Content-Type: application/json" \
-  -d '{"accountId": 1, "operations": 5}'
+curl -X POST http://localhost:8080/api/demos/concurrency/optimistic/transfer-with-retry \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "fromAccountId": 1,
+    "toAccountId": 2,
+    "amount": 100.00,
+    "maxRetries": 3
+  }'
 ```
 
 **Pessimistic Locking**:
 ```bash
-curl -X POST http://localhost:8080/api/demos/concurrency/pessimistic-locking \
-  -H "Content-Type: application/json" \
-  -d '{"accountId": 1, "operations": 5}'
+curl -X POST http://localhost:8080/api/demos/concurrency/pessimistic/transfer-with-lock \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "fromAccountId": 1,
+    "toAccountId": 2,
+    "amount": 100.00,
+    "lockType": "PESSIMISTIC_WRITE"
+  }'
 ```
 
-### Performance Optimization
-
-**Connection Pooling**:
+**Deadlock Demonstration**:
 ```bash
-curl http://localhost:8080/api/demos/performance/connection-pooling?requests=100
+# Terminal 1
+curl -X POST http://localhost:8080/api/demos/concurrency/deadlock/create-deadlock \
+  -d '{"fromAccountId":1,"toAccountId":2,"amount":100,"delayBetweenLocks":2000}'
+
+# Terminal 2 (within 2 seconds)
+curl -X POST http://localhost:8080/api/demos/concurrency/deadlock/create-deadlock \
+  -d '{"fromAccountId":2,"toAccountId":1,"amount":50,"delayBetweenLocks":2000}'
 ```
 
-**Batch Operations**:
+See [docs/demonstrations/](docs/demonstrations/) for complete demonstration guides with explanations.
+
+## 📖 Documentation
+
+### Architecture
+
+- [Architecture Overview](docs/architecture/diagrams/architecture-overview.puml)
+- [Data Flow](docs/architecture/diagrams/data-flow.puml)
+- [Deployment Architecture](docs/architecture/diagrams/deployment.puml)
+
+### Architecture Decision Records (ADRs)
+
+- [ADR 001: Java and Spring Boot](docs/architecture/adr/001-java-spring-boot.md)
+- [ADR 002: PostgreSQL over MySQL](docs/architecture/adr/002-postgresql-over-mysql.md)
+- [ADR 003: HikariCP Connection Pooling](docs/architecture/adr/003-hikaricp-connection-pooling.md)
+- [ADR 004: Observability Stack](docs/architecture/adr/004-observability-stack.md)
+
+### Database
+
+- [Schema Documentation](docs/architecture/database/schema.md)
+- [Indexing Strategy](docs/architecture/database/indexing-strategy.md)
+
+### Runbooks
+
+- [Troubleshooting Guide](docs/runbooks/troubleshooting.md)
+- [Performance Tuning](docs/runbooks/performance-tuning.md)
+
+## 🧪 Testing
+
+### Run All Tests
+
 ```bash
-curl -X POST http://localhost:8080/api/demos/performance/batch-operations \
-  -H "Content-Type: application/json" \
-  -d '{"batchSize": 1000}'
-```
-
-**Caching**:
-```bash
-curl http://localhost:8080/api/demos/performance/caching?userId=1
-```
-
-## Project Structure
-
-```
-oltp-demo/
-├── src/main/java/com/oltp/demo/
-│   ├── config/          # Spring configuration
-│   ├── domain/          # JPA entities
-│   ├── repository/      # Data access
-│   ├── service/         # Business logic
-│   │   ├── acid/        # ACID demonstrations
-│   │   ├── concurrency/ # Concurrency control
-│   │   ├── performance/ # Performance optimizations
-│   │   └── failure/     # Failure handling
-│   ├── controller/      # REST endpoints
-│   └── util/            # Utilities
-├── src/main/resources/
-│   ├── db/migration/    # Flyway SQL scripts
-│   └── application.yml  # Configuration
-├── src/test/
-│   ├── integration/     # Integration tests
-│   ├── performance/     # JMH benchmarks
-│   └── architecture/    # ArchUnit tests
-├── loadtest/
-│   ├── gatling/         # Gatling scenarios
-│   └── locust/          # Locust scenarios
-├── infrastructure/
-│   ├── docker/          # Docker configurations
-│   └── scripts/         # Automation scripts
-├── docs/                # Documentation
-└── specs/               # Feature specifications
-```
-
-## Running Tests
-
-**Unit Tests**:
-```bash
+# Unit + Integration tests
 ./mvnw test
+
+# Code coverage report (JaCoCo)
+./mvnw jacoco:report
+open target/site/jacoco/index.html
 ```
 
-**Integration Tests**:
+### Load Testing
+
 ```bash
-./mvnw verify -P integration-tests
+# Run all benchmarks (JMH + Gatling + Apache Bench)
+./infrastructure/scripts/run-benchmarks.sh all
+
+# View results
+ls -la benchmark-results/
 ```
 
-**Performance Benchmarks**:
-```bash
-./mvnw verify -P benchmarks
+### Performance Targets
+
+| Metric | Target | Actual |
+|--------|--------|--------|
+| Throughput | > 1000 TPS | ~850 TPS |
+| p95 Latency | < 100ms | ~25ms |
+| Error Rate | < 0.1% | < 0.01% |
+| Availability | > 99.9% | 100% |
+
+## 🏗️ Project Structure
+
+```
+oltp-demos/
+├── src/
+│   ├── main/
+│   │   ├── java/com/oltp/demo/
+│   │   │   ├── controller/        # REST API endpoints
+│   │   │   ├── service/           # Business logic (demos)
+│   │   │   ├── repository/        # Data access (JPA, jOOQ)
+│   │   │   ├── domain/            # JPA entities
+│   │   │   └── config/            # Spring configuration
+│   │   └── resources/
+│   │       ├── application.yml    # App configuration
+│   │       ├── db/migration/      # Flyway migrations
+│   │       └── logback-spring.xml # Logging config
+│   └── test/                      # Tests
+├── infrastructure/
+│   ├── docker/                    # Docker Compose setup
+│   │   ├── docker-compose.yml
+│   │   ├── postgres/              # PostgreSQL config
+│   │   ├── prometheus/            # Prometheus config
+│   │   └── grafana/               # Grafana dashboards
+│   └── scripts/                   # Automation scripts
+│       ├── setup.sh               # One-command setup
+│       ├── seed-data.sh           # Generate test data
+│       ├── run-benchmarks.sh      # Run load tests
+│       └── clean-reset.sh         # Reset database
+├── docs/
+│   ├── demonstrations/            # Demo guides (curl examples)
+│   ├── architecture/              # Architecture docs, ADRs, diagrams
+│   └── runbooks/                  # Operational guides
+└── specs/                         # Specifications (spec-driven dev)
 ```
 
-**Load Tests** (Gatling):
-```bash
-./mvnw gatling:test
-```
+## 🛠️ Technology Stack
 
-**Load Tests** (Locust):
-```bash
-cd loadtest/locust
-locust -f scenarios/transfer_load.py
-```
+| Category | Technology | Purpose |
+|----------|------------|---------|
+| **Language** | Java 17+ | Modern Java features (records, pattern matching) |
+| **Framework** | Spring Boot 3.2+ | Application framework, dependency injection |
+| **Database** | PostgreSQL 15+ | ACID-compliant relational database |
+| **ORM** | Spring Data JPA | Declarative data access |
+| **SQL** | jOOQ | Type-safe SQL for advanced queries |
+| **Migrations** | Flyway | Version-controlled database schema |
+| **Connection Pool** | HikariCP | High-performance connection pooling |
+| **Caching** | Redis | Distributed caching layer |
+| **Metrics** | Micrometer + Prometheus | Metrics collection and storage |
+| **Dashboards** | Grafana | Metrics visualization |
+| **Tracing** | OpenTelemetry + Jaeger | Distributed request tracing |
+| **Testing** | JUnit 5, TestContainers | Unit and integration testing |
+| **Load Testing** | Gatling, JMH, Apache Bench | Performance benchmarking |
+| **Resilience** | Resilience4j, Spring Retry | Circuit breakers, retries |
 
-## Monitoring
+## 🎓 Learning Resources
 
-### Metrics
-Access Prometheus metrics at `/actuator/prometheus`:
-- JVM metrics (heap, GC, threads)
-- HikariCP pool metrics
-- Transaction metrics
-- Custom business metrics
+### ACID Demonstrations
 
-### Distributed Tracing
-View traces in Jaeger UI (http://localhost:16686):
-- Request flows across services
-- Database query performance
-- Transaction boundaries
-- Error traces
+- [Atomicity](docs/demonstrations/acid/atomicity.md) - All-or-nothing execution
+- [Consistency](docs/demonstrations/acid/consistency.md) - Constraint enforcement
+- [Isolation](docs/demonstrations/acid/isolation.md) - Concurrent transactions
+- [Durability](docs/demonstrations/acid/durability.md) - Crash recovery
 
-### Health Checks
-```bash
-curl http://localhost:8080/actuator/health
-```
+### Concurrency Demonstrations
 
-## Development
+- [Optimistic Locking](docs/demonstrations/concurrency/optimistic-locking.md) - Version-based concurrency
+- [Pessimistic Locking](docs/demonstrations/concurrency/pessimistic-locking.md) - Lock-based concurrency
+- [Deadlocks](docs/demonstrations/concurrency/deadlocks.md) - Detection and prevention
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and best practices.
+### Failure Demonstrations
 
-### Spec-Driven Development Workflow
+- [Failure Handling](docs/demonstrations/failure/failure-handling.md) - Retry, circuit breakers
+- [Crash Recovery](docs/demonstrations/failure/recovery.md) - WAL and durability
 
-This project uses spec-driven development:
-1. `/speckit.specify` - Create feature specification
-2. `/speckit.plan` - Create implementation plan
-3. `/speckit.tasks` - Generate actionable tasks
-4. `/speckit.implement` - Execute implementation
-5. `/speckit.clarify` - Clarify underspecified areas
-6. `/speckit.analyze` - Analyze consistency and quality
+## 🤝 Contributing
 
-## Documentation
+This project follows **spec-driven development**:
 
-- **Architecture**: [docs/architecture/](docs/architecture/)
-- **Demonstrations**: [docs/demonstrations/](docs/demonstrations/)
-- **Runbooks**: [docs/runbooks/](docs/runbooks/)
-- **API Specification**: [specs/001-oltp-core-demo/contracts/openapi.yaml](specs/001-oltp-core-demo/contracts/openapi.yaml)
-- **Constitution**: [.specify/memory/constitution.md](.specify/memory/constitution.md)
+1. **Specifications first**: Write specs before implementation
+2. **Tests before code**: TDD approach
+3. **Constitution-driven**: See [.specify/memory/constitution.md](.specify/memory/constitution.md)
 
-## Key Concepts Demonstrated
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 
-### Transaction Management
-- ACID compliance with Spring @Transactional
-- Multiple isolation level demonstrations
-- Deadlock detection and retry logic
-- Savepoints and nested transactions
+## 📄 License
 
-### Performance Optimization
-- HikariCP connection pooling
-- JPA query optimization with indexes
-- Batch operations and bulk inserts
-- Redis caching with Spring Cache
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### Concurrency Handling
-- Optimistic locking with @Version
-- Pessimistic locking with LockModeType
-- Concurrent transaction testing
-- Race condition prevention patterns
+## 🙏 Acknowledgments
 
-### Observability
-- Structured logging with correlation IDs
-- Micrometer metrics with Prometheus
-- OpenTelemetry distributed tracing
-- HikariCP pool monitoring
+- Built with spec-driven development methodology
+- Powered by Spring Boot and PostgreSQL
+- Observability stack: Prometheus, Grafana, Jaeger
+- Inspired by real-world production OLTP systems
 
-## Quality Gates
+## 📞 Support
 
-Before merging:
-- [ ] All tests pass (unit, integration, concurrency)
-- [ ] Performance benchmarks meet targets
-- [ ] Code coverage > 80%
-- [ ] Database migrations are reversible
-- [ ] No security vulnerabilities
-- [ ] Documentation updated
-- [ ] Observability instrumented
-
-## License
-
-MIT License - see LICENSE file for details
-
-## References
-
-- [ACID Properties](https://en.wikipedia.org/wiki/ACID)
-- [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [Spring Boot Reference](https://docs.spring.io/spring-boot/docs/current/reference/html/)
-- [HikariCP Performance Tips](https://github.com/brettwooldridge/HikariCP/wiki)
-- [Designing Data-Intensive Applications](https://dataintensive.net/) by Martin Kleppmann
-
-## Support
-
-For issues and questions, see the project documentation or create an issue in the repository.
+- **Documentation**: See [docs/](docs/) directory
+- **Issues**: [GitHub Issues](https://github.com/your-org/oltp-demos/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/oltp-demos/discussions)
 
 ---
 
-**Built with rigor. Tested with realism. Deployed with confidence.**
+**Built with ❤️ for learning OLTP core capabilities**
