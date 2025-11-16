@@ -69,6 +69,13 @@ spring:
         format_sql: false
         use_sql_comments: false
 
+        # Slow Query Logging (T154 - US4: Observability)
+        # Log queries exceeding 50ms threshold
+        session:
+          events:
+            log:
+              LOG_QUERIES_SLOWER_THAN_MS: ${SLOW_QUERY_THRESHOLD_MS:50}
+
         # Default Isolation Level
         connection:
           isolation: 2  # READ_COMMITTED

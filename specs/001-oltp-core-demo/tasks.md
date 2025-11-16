@@ -346,15 +346,15 @@ All paths are from repository root:
 
 #### Slow Query Logging
 
-- [ ] T154 [P] [US4] Configure slow query logging in application.yml (threshold > 50ms)
-- [ ] T155 [US4] Implement SlowQueryLogger in src/main/java/com/oltp/demo/util/SlowQueryLogger.java with EXPLAIN ANALYZE
-- [ ] T156 [US4] Add slow query alert metrics in MetricsHelper
+- [X] T154 [P] [US4] Configure slow query logging in application.yml (threshold > 50ms)
+- [X] T155 [US4] Implement SlowQueryLogger in src/main/java/com/oltp/demo/util/SlowQueryLogger.java with EXPLAIN ANALYZE
+- [X] T156 [US4] Add slow query alert metrics in MetricsHelper
 
 #### REST API Endpoints
 
-- [ ] T157 [P] [US4] Create MetricsController in src/main/java/com/oltp/demo/controller/MetricsController.java
-- [ ] T158 [US4] Implement GET /api/metrics endpoint exposing Prometheus format in MetricsController
-- [ ] T159 [US4] Implement GET /api/health endpoint with database/Redis health checks in MetricsController
+- [X] T157 [P] [US4] Create MetricsController in src/main/java/com/oltp/demo/controller/MetricsController.java
+- [X] T158 [US4] Implement GET /api/metrics endpoint exposing Prometheus format in MetricsController
+- [X] T159 [US4] Implement GET /api/health endpoint with database/Redis health checks in MetricsController
 
 #### Grafana Dashboards
 
