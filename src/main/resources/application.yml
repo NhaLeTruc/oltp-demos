@@ -1,0 +1,205 @@
+spring:
+  application:
+    name: oltp-demo
+
+  # DataSource Configuration (HikariCP)
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/oltpdb}
+    username: ${DATABASE_USER:oltp_user}
+    password: ${DATABASE_PASSWORD:oltp_password}
+    driver-class-name: org.postgresql.Driver
+
+    # HikariCP Connection Pool Configuration
+    hikari:
+      # Performance Tuning (per constitution.md: connection acquisition < 1ms p95)
+      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:20}
+      minimum-idle: ${HIKARI_MIN_IDLE:10}
+      connection-timeout: 250
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+      # Connection Health
+      leak-detection-threshold: 60000
+      validation-timeout: 3000
+
+      # Performance Optimizations
+      auto-commit: false
+
+      # Connection Properties
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
+  # JPA/Hibernate Configuration
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: ${JPA_SHOW_SQL:false}
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    properties:
+      hibernate:
+        # Performance Optimizations
+        jdbc:
+          batch_size: 50
+          fetch_size: 50
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+
+        # Caching (Second-Level Cache)
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+
+        # Statistics & Logging
+        generate_statistics: ${HIBERNATE_STATISTICS:false}
+        format_sql: false
+        use_sql_comments: false
+
+        # Default Isolation Level
+        connection:
+          isolation: 2  # READ_COMMITTED
+
+  # Flyway Database Migration
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    locations: classpath:db/migration
+    table: schema_version
+    baseline-version: 0
+    out-of-order: false
+
+  # Redis Cache Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
+
+  # Cache Configuration
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000  # 10 minutes
+      cache-null-values: false
+      use-key-prefix: true
+      key-prefix: "oltp:cache:"
+
+# Spring Boot Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,flyway
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+        step: 10s
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        hikaricp.connections: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+        hikaricp.connections.acquire: 0.5, 0.95, 0.99
+    tags:
+      application: ${spring.application.name}
+      environment: ${ENVIRONMENT:dev}
+
+  health:
+    db:
+      enabled: true
+    redis:
+      enabled: true
+
+# OpenTelemetry Tracing
+management.tracing:
+  enabled: ${TRACING_ENABLED:true}
+  sampling:
+    probability: ${TRACING_SAMPLE_RATE:1.0}
+
+# Server Configuration
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 20000
+    accept-count: 100
+    max-connections: 10000
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.oltp.demo: ${LOG_LEVEL:DEBUG}
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: ${SQL_LOG_LEVEL:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${SQL_PARAM_LOG_LEVEL:WARN}
+    com.zaxxer.hikari: INFO
+    io.micrometer: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Application-Specific Configuration
+oltp:
+  demo:
+    # ACID Demonstration Configuration
+    acid:
+      default-transfer-amount: 100.00
+      max-transfer-amount: 10000.00
+      concurrent-operations-limit: 100
+
+    # Concurrency Configuration
+    concurrency:
+      retry-attempts: 3
+      retry-backoff-ms: 100
+      deadlock-timeout-ms: 5000
+
+    # Performance Configuration
+    performance:
+      batch-size: 1000
+      connection-pool-test-requests: 100
+      cache-warmup-enabled: true
+
+    # Observability Configuration
+    observability:
+      correlation-id-header: X-Correlation-ID
+      tracing-enabled: ${TRACING_ENABLED:true}
+      slow-query-threshold-ms: 100

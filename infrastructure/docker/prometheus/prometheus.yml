@@ -1,0 +1,25 @@
+# Prometheus configuration for OLTP demo
+# Scrapes metrics from Spring Boot Actuator endpoint
+
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+  external_labels:
+    environment: 'dev'
+    application: 'oltp-demo'
+
+# Scrape configurations
+scrape_configs:
+  # Spring Boot Actuator metrics
+  - job_name: 'oltp-demo'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+        labels:
+          service: 'oltp-demo'
+          instance: 'localhost:8080'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

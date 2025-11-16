@@ -1,0 +1,165 @@
+version: '3.8'
+
+# OLTP Demo Infrastructure
+# Provides: PostgreSQL, Redis, Prometheus, Grafana, Jaeger
+# For local development and demonstration purposes
+
+services:
+  # ==========================================================================
+  # PostgreSQL Database (Primary Data Store)
+  # ==========================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: oltp-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: oltpdb
+      POSTGRES_USER: oltp_user
+      POSTGRES_PASSWORD: oltp_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oltp_user -d oltpdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oltp-network
+
+  # ==========================================================================
+  # Redis Cache
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: oltp-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oltp-network
+
+  # ==========================================================================
+  # Prometheus (Metrics Collection)
+  # ==========================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: oltp-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - oltp-network
+    depends_on:
+      - postgres
+
+  # ==========================================================================
+  # Grafana (Metrics Visualization)
+  # ==========================================================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: oltp-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - oltp-network
+    depends_on:
+      - prometheus
+
+  # ==========================================================================
+  # Jaeger (Distributed Tracing)
+  # ==========================================================================
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: oltp-jaeger
+    ports:
+      - "5775:5775/udp"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+      COLLECTOR_ZIPKIN_HOST_PORT: ":9411"
+    networks:
+      - oltp-network
+
+# ==========================================================================
+# Volumes
+# ==========================================================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+# ==========================================================================
+# Networks
+# ==========================================================================
+networks:
+  oltp-network:
+    driver: bridge
+
+# ==========================================================================
+# Usage Instructions
+# ==========================================================================
+# Start all services:
+#   docker-compose -f infrastructure/docker/docker-compose.yml up -d
+#
+# Stop all services:
+#   docker-compose -f infrastructure/docker/docker-compose.yml down
+#
+# View logs:
+#   docker-compose -f infrastructure/docker/docker-compose.yml logs -f [service]
+#
+# Access URLs:
+#   - PostgreSQL: localhost:5432
+#   - Redis: localhost:6379
+#   - Prometheus: http://localhost:9090
+#   - Grafana: http://localhost:3000 (admin/admin)
+#   - Jaeger UI: http://localhost:16686
+# ==========================================================================

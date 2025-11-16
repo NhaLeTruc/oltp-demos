@@ -1,0 +1,103 @@
+# Development-specific configuration
+# Activate with: --spring.profiles.active=dev
+
+spring:
+  # Development DataSource (Local PostgreSQL via Docker)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/oltpdb_dev
+    username: oltp_dev
+    password: dev_password
+
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+
+  # JPA Development Settings
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        generate_statistics: true
+
+  # Flyway Development Settings
+  flyway:
+    clean-disabled: false  # Allow clean in dev
+    clean-on-validation-error: true
+
+  # Redis Development Settings
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+
+  # H2 Console (for quick local testing without Docker)
+  h2:
+    console:
+      enabled: false  # Set to true if using H2 instead of PostgreSQL
+
+# Actuator - Full exposure in dev
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+  metrics:
+    export:
+      prometheus:
+        step: 5s
+
+# Tracing - Full sampling in dev
+management.tracing:
+  sampling:
+    probability: 1.0  # Sample all requests
+
+# Server Configuration
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: always
+    include-exception: true
+
+# Logging - Verbose in dev
+logging:
+  level:
+    root: INFO
+    com.oltp.demo: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.transaction: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.zaxxer.hikari: DEBUG
+    org.flywaydb: DEBUG
+    io.micrometer: DEBUG
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %clr([%thread]){faint} %clr(%-5level) %clr(%logger{36}){cyan} %clr(-){faint} %msg %clr([%X{correlationId}]){magenta}%n"
+
+# Development-specific OLTP Configuration
+oltp:
+  demo:
+    # Reduced limits for easier testing
+    acid:
+      concurrent-operations-limit: 10
+
+    concurrency:
+      retry-attempts: 3
+      retry-backoff-ms: 50
+
+    performance:
+      batch-size: 100
+      connection-pool-test-requests: 10
+      cache-warmup-enabled: false  # Disable in dev for faster startup
+
+    observability:
+      slow-query-threshold-ms: 50  # Lower threshold to catch slow queries
