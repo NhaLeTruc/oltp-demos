@@ -1,0 +1,957 @@
+openapi: 3.0.3
+info:
+  title: OLTP Core Capabilities Tech Demo API
+  version: 1.0.0
+  description: |
+    REST API for demonstrating OLTP core capabilities including ACID transactions,
+    concurrency control, performance optimization, and observability.
+
+    This API provides endpoints for running interactive demonstrations and accessing
+    metrics/health information.
+
+    ## Observability
+    - All endpoints return `X-Correlation-ID` header for distributed tracing
+    - Metrics exposed at `/api/metrics` (Prometheus format)
+    - Health check available at `/api/health`
+
+  contact:
+    name: OLTP Demo Project
+    url: https://github.com/example/oltp-demos
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: http://localhost:8080/api
+    description: API base path
+
+tags:
+  - name: ACID Demonstrations
+    description: Endpoints demonstrating ACID transaction properties
+  - name: Concurrency Demonstrations
+    description: Endpoints demonstrating concurrency control strategies
+  - name: Performance Demonstrations
+    description: Endpoints demonstrating performance optimization techniques
+  - name: Observability
+    description: Metrics, health checks, and monitoring endpoints
+  - name: Account Management
+    description: Basic account operations for demonstration setup
+
+paths:
+  # ============================================================================
+  # ACID DEMONSTRATIONS
+  # ============================================================================
+
+  /api/demos/acid/atomicity/transfer:
+    post:
+      tags:
+        - ACID Demonstrations
+      summary: Demonstrate atomicity with multi-account transfer
+      description: |
+        Executes a transfer between two accounts within a transaction. If any step
+        fails (e.g., insufficient funds, invalid account), the entire transaction
+        rolls back, demonstrating the Atomicity property.
+
+        **Demo Scenarios**:
+        - Success: Both accounts updated atomically
+        - Failure: Transaction rolled back, no partial state
+      operationId: demonstrateAtomicity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+            examples:
+              success:
+                summary: Successful transfer
+                value:
+                  fromAccountId: 1
+                  toAccountId: 2
+                  amount: 100.00
+                  correlationId: "550e8400-e29b-41d4-a716-446655440000"
+              failure:
+                summary: Insufficient funds (triggers rollback)
+                value:
+                  fromAccountId: 1
+                  toAccountId: 2
+                  amount: 999999.00
+                  correlationId: "550e8400-e29b-41d4-a716-446655440001"
+      responses:
+        '200':
+          description: Transfer completed successfully
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/X-Correlation-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+        '400':
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Business rule violation (e.g., insufficient funds)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/demos/acid/atomicity/fail-mid-transaction:
+    post:
+      tags:
+        - ACID Demonstrations
+      summary: Demonstrate atomicity by forcing mid-transaction failure
+      description: |
+        Simulates a failure during a multi-step transaction to demonstrate
+        automatic rollback. All database changes are rolled back, leaving
+        no partial state.
+      operationId: demonstrateAtomicityFailure
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '500':
+          description: Transaction failed and rolled back
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/X-Correlation-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/demos/acid/consistency/enforce-constraints:
+    post:
+      tags:
+        - ACID Demonstrations
+      summary: Demonstrate consistency by enforcing database constraints
+      description: |
+        Attempts a transfer that would violate database constraints (e.g.,
+        negative balance). Database rejects the transaction, maintaining
+        consistency.
+      operationId: demonstrateConsistency
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '409':
+          description: Constraint violation (consistency maintained)
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/X-Correlation-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "CONSTRAINT_VIOLATION"
+                message: "Balance cannot be negative"
+                correlationId: "550e8400-e29b-41d4-a716-446655440000"
+
+  /api/demos/acid/isolation/concurrent-transfers:
+    post:
+      tags:
+        - ACID Demonstrations
+      summary: Demonstrate isolation with concurrent transactions
+      description: |
+        Executes multiple concurrent transfers to the same accounts and demonstrates
+        different isolation levels.
+
+        **Isolation Levels Demonstrated**:
+        - READ_COMMITTED: Default level, prevents dirty reads
+        - REPEATABLE_READ: Prevents non-repeatable reads
+        - SERIALIZABLE: Full isolation (may cause more conflicts)
+      operationId: demonstrateIsolation
+      parameters:
+        - name: isolationLevel
+          in: query
+          description: Transaction isolation level to demonstrate
+          schema:
+            type: string
+            enum:
+              - READ_COMMITTED
+              - REPEATABLE_READ
+              - SERIALIZABLE
+            default: READ_COMMITTED
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transfers
+              properties:
+                transfers:
+                  type: array
+                  description: List of transfers to execute concurrently
+                  items:
+                    $ref: '#/components/schemas/TransferRequest'
+                  minItems: 2
+                  maxItems: 10
+      responses:
+        '200':
+          description: Concurrent transfers completed
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/X-Correlation-ID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransactionResponse'
+                  isolationLevel:
+                    type: string
+                  conflictsDetected:
+                    type: integer
+                    description: Number of conflicts detected and resolved
+
+  /api/demos/acid/durability/crash-recovery:
+    get:
+      tags:
+        - ACID Demonstrations
+      summary: Demonstrate durability by verifying committed transactions survived
+      description: |
+        Queries the transfer_logs table to verify that all committed transactions
+        are durably stored. Can be run after simulated database crash to demonstrate
+        durability.
+      operationId: demonstrateDurability
+      parameters:
+        - name: correlationId
+          in: query
+          description: Correlation ID of transaction to verify
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transaction logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transferLogs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransferLog'
+                  totalCommitted:
+                    type: integer
+                    description: Total number of committed transactions
+                  durabilityVerified:
+                    type: boolean
+                    description: All committed transactions found in logs
+
+  # ============================================================================
+  # CONCURRENCY DEMONSTRATIONS
+  # ============================================================================
+
+  /api/demos/concurrency/optimistic-locking:
+    post:
+      tags:
+        - Concurrency Demonstrations
+      summary: Demonstrate optimistic locking with version checking
+      description: |
+        Executes a transfer using optimistic locking (JPA @Version). If two
+        transactions attempt to update the same account concurrently, one will
+        fail with OptimisticLockException and retry.
+
+        **Demonstration**:
+        - Multiple concurrent requests to same account
+        - Version conflicts detected automatically
+        - Failed transactions retry with exponential backoff
+      operationId: demonstrateOptimisticLocking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accountId
+                - operations
+              properties:
+                accountId:
+                  type: integer
+                  format: int64
+                  description: Account to perform concurrent operations on
+                operations:
+                  type: array
+                  description: List of concurrent operations (deposits/withdrawals)
+                  items:
+                    type: object
+                    properties:
+                      amount:
+                        type: number
+                        format: decimal
+                      type:
+                        type: string
+                        enum: [DEPOSIT, WITHDRAWAL]
+                  minItems: 2
+                  maxItems: 100
+      responses:
+        '200':
+          description: Concurrent operations completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  successfulOperations:
+                    type: integer
+                  retriesPerformed:
+                    type: integer
+                  conflictsDetected:
+                    type: integer
+                  finalBalance:
+                    type: number
+                    format: decimal
+
+  /api/demos/concurrency/pessimistic-locking:
+    post:
+      tags:
+        - Concurrency Demonstrations
+      summary: Demonstrate pessimistic locking with explicit row locks
+      description: |
+        Executes a transfer using pessimistic locking (SELECT FOR UPDATE). Transactions
+        explicitly lock rows, preventing concurrent modifications.
+
+        **Demonstration**:
+        - Explicit row locks acquired at transaction start
+        - Other transactions wait for lock release
+        - No version conflicts (serialized access)
+        - Predictable ordering
+      operationId: demonstratePessimisticLocking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '200':
+          description: Transfer completed with exclusive lock
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+              example:
+                transactionId: 12345
+                status: "COMPLETED"
+                lockAcquiredAt: "2025-11-16T10:30:00Z"
+                lockReleasedAt: "2025-11-16T10:30:00.105Z"
+                lockHoldTime: 105
+
+  /api/demos/concurrency/deadlock:
+    post:
+      tags:
+        - Concurrency Demonstrations
+      summary: Demonstrate deadlock detection and resolution
+      description: |
+        Creates a deadlock scenario by executing two transfers in opposite directions
+        simultaneously:
+        - Transaction T1: Transfer A → B
+        - Transaction T2: Transfer B → A
+
+        PostgreSQL detects the deadlock and aborts one transaction. Application
+        automatically retries the aborted transaction.
+      operationId: demonstrateDeadlock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accountIdA
+                - accountIdB
+                - amount
+              properties:
+                accountIdA:
+                  type: integer
+                  format: int64
+                accountIdB:
+                  type: integer
+                  format: int64
+                amount:
+                  type: number
+                  format: decimal
+      responses:
+        '200':
+          description: Deadlock detected and resolved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deadlockDetected:
+                    type: boolean
+                  abortedTransactionId:
+                    type: integer
+                    format: int64
+                  retriedSuccessfully:
+                    type: boolean
+                  resolutionTime:
+                    type: integer
+                    description: Time to detect and resolve (milliseconds)
+
+  # ============================================================================
+  # PERFORMANCE DEMONSTRATIONS
+  # ============================================================================
+
+  /api/demos/performance/connection-pooling:
+    get:
+      tags:
+        - Performance Demonstrations
+      summary: Demonstrate connection pooling performance impact
+      description: |
+        Compares query performance with and without connection pooling:
+        - **Pooled**: Reuses existing connections (< 1ms acquisition)
+        - **Unpooled**: Creates new connection per query (50-100ms overhead)
+
+        Returns detailed metrics showing the performance difference.
+      operationId: demonstrateConnectionPooling
+      parameters:
+        - name: queryCount
+          in: query
+          description: Number of queries to execute
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+      responses:
+        '200':
+          description: Connection pooling metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pooledMetrics:
+                    $ref: '#/components/schemas/PerformanceMetrics'
+                  unpooledMetrics:
+                    $ref: '#/components/schemas/PerformanceMetrics'
+                  performanceGain:
+                    type: number
+                    description: Pooled speedup factor (e.g., 10x faster)
+                  hikariPoolStats:
+                    $ref: '#/components/schemas/HikariPoolStats'
+
+  /api/demos/performance/batch-operations:
+    post:
+      tags:
+        - Performance Demonstrations
+      summary: Demonstrate batch operation performance
+      description: |
+        Compares performance of individual inserts vs batch inserts:
+        - **Individual**: N separate INSERT statements
+        - **Batch**: Single batch INSERT with N rows
+
+        Demonstrates throughput improvements from batching.
+      operationId: demonstrateBatchOperations
+      parameters:
+        - name: rowCount
+          in: query
+          description: Number of rows to insert
+          schema:
+            type: integer
+            default: 1000
+            minimum: 100
+            maximum: 10000
+      responses:
+        '200':
+          description: Batch operation metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  individualInserts:
+                    $ref: '#/components/schemas/PerformanceMetrics'
+                  batchInserts:
+                    $ref: '#/components/schemas/PerformanceMetrics'
+                  throughputGain:
+                    type: number
+                    description: Batch speedup factor
+
+  /api/demos/performance/caching:
+    get:
+      tags:
+        - Performance Demonstrations
+      summary: Demonstrate caching performance impact
+      description: |
+        Executes queries with and without Redis caching:
+        - **First request**: Cache miss, query database (5-10ms)
+        - **Subsequent requests**: Cache hit, retrieve from Redis (<1ms)
+
+        Shows cache hit ratio and latency improvements.
+      operationId: demonstrateCaching
+      parameters:
+        - name: accountId
+          in: query
+          required: true
+          description: Account ID to query
+          schema:
+            type: integer
+            format: int64
+        - name: requestCount
+          in: query
+          description: Number of requests to measure cache performance
+          schema:
+            type: integer
+            default: 100
+            minimum: 10
+            maximum: 1000
+      responses:
+        '200':
+          description: Caching performance metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cacheHits:
+                    type: integer
+                  cacheMisses:
+                    type: integer
+                  hitRatio:
+                    type: number
+                    description: Percentage (0-100)
+                  averageLatencyWithCache:
+                    type: number
+                    description: Milliseconds
+                  averageLatencyWithoutCache:
+                    type: number
+                    description: Milliseconds
+                  latencyImprovement:
+                    type: number
+                    description: Speedup factor
+
+  /api/demos/performance/indexing:
+    get:
+      tags:
+        - Performance Demonstrations
+      summary: Demonstrate indexing performance impact
+      description: |
+        Compares query performance with and without indexes:
+        - **Indexed query**: Uses index scan (< 5ms)
+        - **Full table scan**: Scans all rows (100-1000ms)
+
+        Returns EXPLAIN ANALYZE output showing query plans.
+      operationId: demonstrateIndexing
+      parameters:
+        - name: useIndex
+          in: query
+          description: Whether to use indexed column in query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Indexing performance comparison
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  indexedQuery:
+                    $ref: '#/components/schemas/QueryPlan'
+                  fullScanQuery:
+                    $ref: '#/components/schemas/QueryPlan'
+                  performanceGain:
+                    type: number
+                    description: Indexed speedup factor
+
+  # ============================================================================
+  # OBSERVABILITY
+  # ============================================================================
+
+  /api/metrics:
+    get:
+      tags:
+        - Observability
+      summary: Prometheus metrics endpoint
+      description: |
+        Exposes application metrics in Prometheus format:
+        - JVM metrics (heap, GC, threads)
+        - HikariCP connection pool metrics
+        - Transaction throughput and latency
+        - HTTP request metrics
+        - Custom business metrics
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |
+                # HELP hikaricp_connections_active Active connections
+                # TYPE hikaricp_connections_active gauge
+                hikaricp_connections_active{pool="HikariPool-1"} 5.0
+
+                # HELP transaction_throughput_total Total transactions processed
+                # TYPE transaction_throughput_total counter
+                transaction_throughput_total{type="TRANSFER"} 12345.0
+
+  /api/health:
+    get:
+      tags:
+        - Observability
+      summary: Health check endpoint
+      description: |
+        Returns application health status:
+        - Database connectivity
+        - Redis connectivity
+        - Connection pool health
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Application healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [UP, DOWN]
+                  components:
+                    type: object
+                    properties:
+                      database:
+                        $ref: '#/components/schemas/HealthStatus'
+                      redis:
+                        $ref: '#/components/schemas/HealthStatus'
+                      hikaricp:
+                        $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Application unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [DOWN]
+                  components:
+                    type: object
+                    additionalProperties:
+                      $ref: '#/components/schemas/HealthStatus'
+
+  # ============================================================================
+  # ACCOUNT MANAGEMENT (for demo setup)
+  # ============================================================================
+
+  /api/accounts:
+    post:
+      tags:
+        - Account Management
+      summary: Create a new account
+      description: Creates a new account for demonstration purposes
+      operationId: createAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - accountTypeId
+                - initialBalance
+              properties:
+                userId:
+                  type: integer
+                  format: int64
+                accountTypeId:
+                  type: integer
+                initialBalance:
+                  type: number
+                  format: decimal
+                  minimum: 0
+      responses:
+        '201':
+          description: Account created
+          headers:
+            X-Correlation-ID:
+              $ref: '#/components/headers/X-Correlation-ID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+
+    get:
+      tags:
+        - Account Management
+      summary: List all accounts
+      description: Retrieves all accounts (for demo purposes only)
+      operationId: listAccounts
+      parameters:
+        - name: userId
+          in: query
+          description: Filter by user ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+
+  /api/accounts/{accountId}:
+    get:
+      tags:
+        - Account Management
+      summary: Get account details
+      description: Retrieves account details including current balance
+      operationId: getAccount
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Account ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Account details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+# ============================================================================
+# COMPONENTS
+# ============================================================================
+
+components:
+  headers:
+    X-Correlation-ID:
+      description: Correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"
+
+  schemas:
+    TransferRequest:
+      type: object
+      required:
+        - fromAccountId
+        - toAccountId
+        - amount
+      properties:
+        fromAccountId:
+          type: integer
+          format: int64
+          description: Source account ID
+        toAccountId:
+          type: integer
+          format: int64
+          description: Destination account ID
+        amount:
+          type: number
+          format: decimal
+          minimum: 0.01
+          description: Transfer amount (positive)
+        correlationId:
+          type: string
+          format: uuid
+          description: Optional correlation ID for tracing
+
+    TransactionResponse:
+      type: object
+      properties:
+        transactionId:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED, ROLLED_BACK]
+        amount:
+          type: number
+          format: decimal
+        correlationId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    TransferLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        transactionId:
+          type: integer
+          format: int64
+        fromAccountId:
+          type: integer
+          format: int64
+        toAccountId:
+          type: integer
+          format: int64
+        amount:
+          type: number
+          format: decimal
+        status:
+          type: string
+          enum: [INITIATED, COMPLETED, FAILED]
+        correlationId:
+          type: string
+          format: uuid
+        loggedAt:
+          type: string
+          format: date-time
+
+    Account:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        accountTypeId:
+          type: integer
+        balance:
+          type: number
+          format: decimal
+        version:
+          type: integer
+          format: int64
+          description: Optimistic locking version
+        status:
+          type: string
+          enum: [ACTIVE, SUSPENDED, CLOSED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PerformanceMetrics:
+      type: object
+      properties:
+        operationCount:
+          type: integer
+        totalTime:
+          type: number
+          description: Total time in milliseconds
+        averageTime:
+          type: number
+          description: Average time per operation (ms)
+        p50Latency:
+          type: number
+          description: 50th percentile latency (ms)
+        p95Latency:
+          type: number
+          description: 95th percentile latency (ms)
+        p99Latency:
+          type: number
+          description: 99th percentile latency (ms)
+        throughput:
+          type: number
+          description: Operations per second
+
+    HikariPoolStats:
+      type: object
+      properties:
+        totalConnections:
+          type: integer
+        activeConnections:
+          type: integer
+        idleConnections:
+          type: integer
+        threadsAwaitingConnection:
+          type: integer
+        connectionTimeout:
+          type: integer
+          description: Milliseconds
+        maxPoolSize:
+          type: integer
+        minIdle:
+          type: integer
+
+    QueryPlan:
+      type: object
+      properties:
+        query:
+          type: string
+          description: SQL query executed
+        executionTime:
+          type: number
+          description: Execution time in milliseconds
+        planType:
+          type: string
+          enum: [INDEX_SCAN, SEQ_SCAN, BITMAP_INDEX_SCAN]
+        rowsScanned:
+          type: integer
+        explainOutput:
+          type: string
+          description: Full EXPLAIN ANALYZE output
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN, UNKNOWN]
+        details:
+          type: object
+          additionalProperties: true
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        correlationId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
