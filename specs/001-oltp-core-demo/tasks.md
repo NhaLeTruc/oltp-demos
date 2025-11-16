@@ -166,10 +166,10 @@ All paths are from repository root:
 
 #### Documentation
 
-- [ ] T076 [P] [US1] Create atomicity.md in docs/demonstrations/acid/ with curl examples
-- [ ] T077 [P] [US1] Create consistency.md in docs/demonstrations/acid/ with curl examples
-- [ ] T078 [P] [US1] Create isolation.md in docs/demonstrations/acid/ with curl examples
-- [ ] T079 [P] [US1] Create durability.md in docs/demonstrations/acid/ with curl examples
+- [X] T076 [P] [US1] Create atomicity.md in docs/demonstrations/acid/ with curl examples
+- [X] T077 [P] [US1] Create consistency.md in docs/demonstrations/acid/ with curl examples
+- [X] T078 [P] [US1] Create isolation.md in docs/demonstrations/acid/ with curl examples
+- [X] T079 [P] [US1] Create durability.md in docs/demonstrations/acid/ with curl examples
 
 **Checkpoint**: User Story 1 complete - ACID demonstrations fully functional and testable independently
 
@@ -231,9 +231,9 @@ All paths are from repository root:
 
 #### Documentation
 
-- [ ] T106 [P] [US2] Create optimistic-locking.md in docs/demonstrations/concurrency/ with scenarios and metrics interpretation
-- [ ] T107 [P] [US2] Create pessimistic-locking.md in docs/demonstrations/concurrency/ with lock acquisition examples
-- [ ] T108 [P] [US2] Create deadlocks.md in docs/demonstrations/concurrency/ with detection and recovery explanation
+- [X] T106 [P] [US2] Create optimistic-locking.md in docs/demonstrations/concurrency/ with scenarios and metrics interpretation
+- [X] T107 [P] [US2] Create pessimistic-locking.md in docs/demonstrations/concurrency/ with lock acquisition examples
+- [X] T108 [P] [US2] Create deadlocks.md in docs/demonstrations/concurrency/ with detection and recovery explanation
 
 **Checkpoint**: User Story 2 complete - Concurrency demonstrations fully functional and testable independently
 
@@ -451,18 +451,18 @@ All paths are from repository root:
 
 ### Automation Scripts
 
-- [ ] T198 [P] Create setup.sh in infrastructure/scripts/ for one-command project initialization
-- [ ] T199 [P] Create seed-data.sh in infrastructure/scripts/ to generate 1M rows of realistic test data
-- [ ] T200 [P] Create run-benchmarks.sh in infrastructure/scripts/ to execute all JMH and Gatling tests
-- [ ] T201 [P] Create clean-reset.sh in infrastructure/scripts/ to reset database and caches
+- [X] T198 [P] Create setup.sh in infrastructure/scripts/ for one-command project initialization
+- [X] T199 [P] Create seed-data.sh in infrastructure/scripts/ to generate 1M rows of realistic test data
+- [X] T200 [P] Create run-benchmarks.sh in infrastructure/scripts/ to execute all JMH and Gatling tests
+- [X] T201 [P] Create clean-reset.sh in infrastructure/scripts/ to reset database and caches
 
 ### Account Management API (Supporting Endpoints)
 
-- [ ] T202 [P] Create AccountController in src/main/java/com/oltp/demo/controller/AccountController.java
-- [ ] T203 Create AccountService in src/main/java/com/oltp/demo/service/AccountService.java with CRUD operations
-- [ ] T204 Implement POST /api/accounts endpoint in AccountController
-- [ ] T205 Implement GET /api/accounts endpoint with filtering in AccountController
-- [ ] T206 Implement GET /api/accounts/{id} endpoint in AccountController
+- [X] T202 [P] Create AccountController in src/main/java/com/oltp/demo/controller/AccountController.java
+- [X] T203 Create AccountService in src/main/java/com/oltp/demo/service/AccountService.java with CRUD operations
+- [X] T204 Implement POST /api/accounts endpoint in AccountController
+- [X] T205 Implement GET /api/accounts endpoint with filtering in AccountController
+- [X] T206 Implement GET /api/accounts/{id} endpoint in AccountController
 
 ### Architecture Decision Records
 
