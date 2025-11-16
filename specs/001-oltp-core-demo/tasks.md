@@ -331,11 +331,11 @@ All paths are from repository root:
 
 #### Metrics Instrumentation
 
-- [ ] T145 [P] [US4] Enhance MetricsHelper in src/main/java/com/oltp/demo/util/MetricsHelper.java with custom transaction metrics
-- [ ] T146 [US4] Add transaction throughput counter to all service methods via MetricsHelper
-- [ ] T147 [US4] Add transaction latency timer to all service methods via MetricsHelper
-- [ ] T148 [US4] Add connection pool metrics collection in DatabaseConfig
-- [ ] T149 [US4] Add error rate counter to GlobalExceptionHandler
+- [X] T145 [P] [US4] Enhance MetricsHelper in src/main/java/com/oltp/demo/util/MetricsHelper.java with custom transaction metrics
+- [X] T146 [US4] Add transaction throughput counter to all service methods via MetricsHelper
+- [X] T147 [US4] Add transaction latency timer to all service methods via MetricsHelper
+- [X] T148 [US4] Add connection pool metrics collection in DatabaseConfig
+- [X] T149 [US4] Add error rate counter to GlobalExceptionHandler
 
 #### Distributed Tracing
 

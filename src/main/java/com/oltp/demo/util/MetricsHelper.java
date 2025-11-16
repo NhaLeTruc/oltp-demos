@@ -219,6 +219,283 @@ public class MetricsHelper {
         log.warn("Deadlock detected and recorded in metrics");
     }
 
+    // =========================================================================
+    // US4: Comprehensive Observability - Custom Transaction Metrics (T145-T149)
+    // =========================================================================
+
+    /**
+     * Records transaction throughput (T146).
+     *
+     * Tracks number of transactions processed per unit time by type and status.
+     *
+     * Metrics created:
+     * - oltp.transaction.throughput (counter): Total transactions
+     *
+     * Tags:
+     * - transaction_type: TRANSFER/DEPOSIT/WITHDRAWAL
+     * - status: success/failure/rolled_back
+     * - service: Service class name
+     *
+     * @param transactionType Type of transaction
+     * @param status Status of transaction (success/failure/rolled_back)
+     * @param serviceName Name of service processing transaction
+     */
+    public void recordTransactionThroughput(String transactionType, String status, String serviceName) {
+        Counter.builder("oltp.transaction.throughput")
+            .tag("transaction_type", transactionType)
+            .tag("status", status)
+            .tag("service", serviceName)
+            .tag("correlationId", getCorrelationIdOrDefault())
+            .description("Total number of transactions processed")
+            .register(meterRegistry)
+            .increment();
+
+        log.debug("Transaction throughput recorded: type={}, status={}, service={}",
+            transactionType, status, serviceName);
+    }
+
+    /**
+     * Records transaction latency distribution (T147).
+     *
+     * Captures end-to-end transaction execution time with percentiles.
+     *
+     * Metrics created:
+     * - oltp.transaction.latency (timer): Transaction latency distribution
+     *
+     * Tags:
+     * - transaction_type: TRANSFER/DEPOSIT/WITHDRAWAL
+     * - service: Service class name
+     *
+     * SLOs:
+     * - Simple transactions: p95 < 10ms
+     * - Complex transactions: p95 < 50ms
+     *
+     * @param transactionType Type of transaction
+     * @param serviceName Name of service processing transaction
+     * @param durationMs Transaction duration in milliseconds
+     */
+    public void recordTransactionLatency(String transactionType, String serviceName, long durationMs) {
+        Timer.builder("oltp.transaction.latency")
+            .tag("transaction_type", transactionType)
+            .tag("service", serviceName)
+            .tag("correlationId", getCorrelationIdOrDefault())
+            .description("Transaction execution latency distribution")
+            .publishPercentiles(0.5, 0.95, 0.99) // p50, p95, p99
+            .register(meterRegistry)
+            .record(durationMs, TimeUnit.MILLISECONDS);
+
+        // SLO violation warnings
+        if (durationMs > 50) {
+            log.warn("Transaction latency exceeded SLO: {}ms (target: <50ms p95) - type={}, service={}",
+                durationMs, transactionType, serviceName);
+        }
+
+        log.debug("Transaction latency recorded: type={}, service={}, duration={}ms",
+            transactionType, serviceName, durationMs);
+    }
+
+    /**
+     * Records connection pool metrics (T148).
+     *
+     * Tracks HikariCP connection pool health and utilization.
+     *
+     * Metrics created:
+     * - oltp.connection.pool.active (gauge): Active connections
+     * - oltp.connection.pool.idle (gauge): Idle connections
+     * - oltp.connection.pool.total (gauge): Total connections
+     * - oltp.connection.pool.pending (gauge): Pending thread requests
+     * - oltp.connection.pool.wait_time (timer): Wait time for connection
+     *
+     * @param activeConnections Number of active connections
+     * @param idleConnections Number of idle connections
+     * @param totalConnections Total connections in pool
+     * @param pendingThreads Number of threads waiting for connection
+     */
+    public void recordConnectionPoolMetrics(
+            int activeConnections,
+            int idleConnections,
+            int totalConnections,
+            int pendingThreads) {
+
+        // Register gauges for pool state
+        Gauge.builder("oltp.connection.pool.active", () -> activeConnections)
+            .description("Number of active connections in the pool")
+            .register(meterRegistry);
+
+        Gauge.builder("oltp.connection.pool.idle", () -> idleConnections)
+            .description("Number of idle connections in the pool")
+            .register(meterRegistry);
+
+        Gauge.builder("oltp.connection.pool.total", () -> totalConnections)
+            .description("Total number of connections in the pool")
+            .register(meterRegistry);
+
+        Gauge.builder("oltp.connection.pool.pending", () -> pendingThreads)
+            .description("Number of threads waiting for a connection")
+            .register(meterRegistry);
+
+        // Alert if pool is exhausted
+        if (pendingThreads > 0) {
+            log.warn("Connection pool has {} pending threads waiting for connections", pendingThreads);
+        }
+
+        // Alert if pool utilization is high
+        double utilization = totalConnections > 0 ? (activeConnections * 100.0) / totalConnections : 0;
+        if (utilization > 80) {
+            log.warn("Connection pool utilization high: {:.1f}% ({}/{} connections active)",
+                utilization, activeConnections, totalConnections);
+        }
+
+        log.debug("Connection pool metrics recorded: active={}, idle={}, total={}, pending={}",
+            activeConnections, idleConnections, totalConnections, pendingThreads);
+    }
+
+    /**
+     * Records connection wait time (T148).
+     *
+     * Tracks how long threads wait to acquire a connection from the pool.
+     *
+     * @param waitTimeMs Wait time in milliseconds
+     */
+    public void recordConnectionWaitTime(long waitTimeMs) {
+        Timer.builder("oltp.connection.pool.wait_time")
+            .description("Time spent waiting for a connection from the pool")
+            .publishPercentiles(0.5, 0.95, 0.99)
+            .register(meterRegistry)
+            .record(waitTimeMs, TimeUnit.MILLISECONDS);
+
+        if (waitTimeMs > 100) {
+            log.warn("Connection wait time exceeded 100ms: {}ms", waitTimeMs);
+        }
+    }
+
+    /**
+     * Records error rate by type and service (T149).
+     *
+     * Tracks application errors for monitoring and alerting.
+     *
+     * Metrics created:
+     * - oltp.error.count (counter): Total errors
+     * - oltp.error.rate (gauge): Errors per second
+     *
+     * Tags:
+     * - error_type: SQL_EXCEPTION/OPTIMISTIC_LOCK/DEADLOCK/VALIDATION/etc
+     * - service: Service class where error occurred
+     * - severity: ERROR/WARN
+     *
+     * @param errorType Type of error
+     * @param serviceName Service where error occurred
+     * @param severity Error severity (ERROR/WARN)
+     */
+    public void recordError(String errorType, String serviceName, String severity) {
+        Counter.builder("oltp.error.count")
+            .tag("error_type", errorType)
+            .tag("service", serviceName)
+            .tag("severity", severity)
+            .tag("correlationId", getCorrelationIdOrDefault())
+            .description("Total number of errors by type and service")
+            .register(meterRegistry)
+            .increment();
+
+        log.error("Error recorded in metrics: type={}, service={}, severity={}, correlationId={}",
+            errorType, serviceName, severity, getCorrelationIdOrDefault());
+    }
+
+    /**
+     * Records a database exception (T149).
+     *
+     * Specialized error tracking for database-related failures.
+     *
+     * @param exceptionClass Exception class name
+     * @param sqlState SQL state code (if available)
+     * @param serviceName Service where exception occurred
+     */
+    public void recordDatabaseException(String exceptionClass, String sqlState, String serviceName) {
+        Counter.builder("oltp.database.exception")
+            .tag("exception_class", exceptionClass)
+            .tag("sql_state", sqlState != null ? sqlState : "unknown")
+            .tag("service", serviceName)
+            .tag("correlationId", getCorrelationIdOrDefault())
+            .description("Database exceptions by type and SQL state")
+            .register(meterRegistry)
+            .increment();
+
+        log.error("Database exception recorded: class={}, sqlState={}, service={}, correlationId={}",
+            exceptionClass, sqlState, serviceName, getCorrelationIdOrDefault());
+    }
+
+    /**
+     * Records slow query detection (for T156).
+     *
+     * Tracks queries that exceed the slow query threshold.
+     *
+     * @param queryType Type of query (SELECT/INSERT/UPDATE/DELETE)
+     * @param durationMs Query duration in milliseconds
+     * @param threshold Slow query threshold in milliseconds
+     */
+    public void recordSlowQuery(String queryType, long durationMs, long threshold) {
+        if (durationMs > threshold) {
+            Counter.builder("oltp.slow_query.count")
+                .tag("query_type", queryType)
+                .tag("threshold_ms", String.valueOf(threshold))
+                .description("Number of slow queries detected")
+                .register(meterRegistry)
+                .increment();
+
+            Timer.builder("oltp.slow_query.duration")
+                .tag("query_type", queryType)
+                .description("Slow query duration distribution")
+                .publishPercentiles(0.95, 0.99)
+                .register(meterRegistry)
+                .record(durationMs, TimeUnit.MILLISECONDS);
+
+            log.warn("Slow query detected: type={}, duration={}ms (threshold={}ms)",
+                queryType, durationMs, threshold);
+        }
+    }
+
+    /**
+     * Records cache hit/miss metrics (for caching demonstration).
+     *
+     * @param cacheName Name of the cache
+     * @param hit Whether it was a cache hit (true) or miss (false)
+     */
+    public void recordCacheAccess(String cacheName, boolean hit) {
+        String status = hit ? "hit" : "miss";
+
+        Counter.builder("oltp.cache.access")
+            .tag("cache", cacheName)
+            .tag("status", status)
+            .description("Cache access statistics")
+            .register(meterRegistry)
+            .increment();
+    }
+
+    /**
+     * Records batch operation metrics.
+     *
+     * @param batchSize Number of records in batch
+     * @param durationMs Batch processing duration
+     * @param successCount Number of successful records
+     */
+    public void recordBatchOperation(int batchSize, long durationMs, int successCount) {
+        Timer.builder("oltp.batch.duration")
+            .tag("batch_size", String.valueOf(batchSize))
+            .description("Batch operation duration")
+            .register(meterRegistry)
+            .record(durationMs, TimeUnit.MILLISECONDS);
+
+        Counter.builder("oltp.batch.records")
+            .tag("status", successCount == batchSize ? "success" : "partial")
+            .description("Records processed in batch operations")
+            .register(meterRegistry)
+            .increment(successCount);
+
+        double throughput = batchSize > 0 ? (successCount * 1000.0) / durationMs : 0;
+        log.debug("Batch operation recorded: size={}, duration={}ms, throughput={:.1f} records/sec",
+            batchSize, durationMs, throughput);
+    }
+
     /**
      * Gets correlation ID from MDC or returns "none".
      *
