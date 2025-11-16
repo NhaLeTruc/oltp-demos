@@ -280,9 +280,9 @@ All paths are from repository root:
 
 #### jOOQ Advanced Queries
 
-- [ ] T126 [P] [US3] Create AccountJooqRepository in src/main/java/com/oltp/demo/repository/jooq/AccountJooqRepository.java
-- [ ] T127 [US3] Implement type-safe complex queries with jOOQ in AccountJooqRepository
-- [ ] T128 [US3] Implement batch operations with jOOQ in AccountJooqRepository
+- [X] T126 [P] [US3] Create AccountJooqRepository in src/main/java/com/oltp/demo/repository/jooq/AccountJooqRepository.java
+- [X] T127 [US3] Implement type-safe complex queries with jOOQ in AccountJooqRepository
+- [X] T128 [US3] Implement batch operations with jOOQ in AccountJooqRepository
 
 #### REST API Endpoints
 

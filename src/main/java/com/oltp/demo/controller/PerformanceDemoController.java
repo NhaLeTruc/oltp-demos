@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.oltp.demo.repository.jooq.AccountJooqRepository;
 import com.oltp.demo.service.performance.BatchOperationService;
 import com.oltp.demo.service.performance.CachingService;
 import com.oltp.demo.service.performance.ConnectionPoolingService;
@@ -50,6 +51,7 @@ public class PerformanceDemoController {
     private final BatchOperationService batchOperationService;
     private final CachingService cachingService;
     private final IndexingDemoService indexingDemoService;
+    private final AccountJooqRepository accountJooqRepository;
 
     // =========================================================================
     // Connection Pooling Demonstrations
@@ -295,6 +297,104 @@ public class PerformanceDemoController {
 
         } catch (Exception e) {
             log.error("Sequential scan demo failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // =========================================================================
+    // jOOQ Demonstrations
+    // =========================================================================
+
+    @GetMapping("/jooq/accounts-with-users")
+    @Operation(summary = "Demonstrate jOOQ type-safe joins",
+               description = "Shows type-safe multi-table joins with jOOQ")
+    public ResponseEntity<List<AccountJooqRepository.AccountWithUserDTO>> demonstrateJooqJoins() {
+        log.info("API: jOOQ joins demo");
+
+        try {
+            List<AccountJooqRepository.AccountWithUserDTO> results =
+                accountJooqRepository.findAccountsWithUsers();
+
+            return ResponseEntity.ok(results);
+
+        } catch (Exception e) {
+            log.error("jOOQ joins demo failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/jooq/transaction-stats")
+    @Operation(summary = "Demonstrate jOOQ complex queries",
+               description = "Shows aggregations and multi-table joins with jOOQ")
+    public ResponseEntity<List<AccountJooqRepository.AccountTransactionSummaryDTO>> demonstrateJooqComplexQuery(
+            @RequestParam(defaultValue = "0") int minTransactionCount) {
+
+        log.info("API: jOOQ complex query demo - minTransactionCount={}", minTransactionCount);
+
+        try {
+            List<AccountJooqRepository.AccountTransactionSummaryDTO> results =
+                accountJooqRepository.findAccountsWithTransactionStats(minTransactionCount);
+
+            return ResponseEntity.ok(results);
+
+        } catch (Exception e) {
+            log.error("jOOQ complex query demo failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/jooq/top-accounts-by-type")
+    @Operation(summary = "Demonstrate jOOQ window functions",
+               description = "Shows window functions (ROW_NUMBER) with partitioning")
+    public ResponseEntity<List<AccountJooqRepository.AccountRankingDTO>> demonstrateJooqWindowFunctions() {
+        log.info("API: jOOQ window functions demo");
+
+        try {
+            List<AccountJooqRepository.AccountRankingDTO> results =
+                accountJooqRepository.findTopAccountsByTypeWithRanking();
+
+            return ResponseEntity.ok(results);
+
+        } catch (Exception e) {
+            log.error("jOOQ window functions demo failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/jooq/high-value-accounts")
+    @Operation(summary = "Demonstrate jOOQ CTE queries",
+               description = "Shows Common Table Expressions (WITH clause)")
+    public ResponseEntity<List<AccountJooqRepository.HighValueAccountDTO>> demonstrateJooqCTE(
+            @RequestParam(defaultValue = "1000") BigDecimal minBalance) {
+
+        log.info("API: jOOQ CTE demo - minBalance={}", minBalance);
+
+        try {
+            List<AccountJooqRepository.HighValueAccountDTO> results =
+                accountJooqRepository.findHighValueAccountsWithCTE(minBalance);
+
+            return ResponseEntity.ok(results);
+
+        } catch (Exception e) {
+            log.error("jOOQ CTE demo failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/jooq/join-performance")
+    @Operation(summary = "Demonstrate JOIN vs N+1 query performance",
+               description = "Compares efficient JOIN with inefficient N+1 queries")
+    public ResponseEntity<AccountJooqRepository.JoinPerformanceComparisonDTO> demonstrateJoinPerformance() {
+        log.info("API: JOIN performance comparison demo");
+
+        try {
+            AccountJooqRepository.JoinPerformanceComparisonDTO result =
+                accountJooqRepository.compareJoinPerformance();
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("JOIN performance demo failed: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
