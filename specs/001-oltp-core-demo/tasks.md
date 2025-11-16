@@ -473,19 +473,19 @@ All paths are from repository root:
 
 ### Architecture Diagrams
 
-- [ ] T211 [P] Create architecture-overview.puml in docs/architecture/diagrams/ with component diagram
-- [ ] T212 [P] Create data-flow.puml in docs/architecture/diagrams/ with transaction flow sequence
-- [ ] T213 [P] Create deployment.puml in docs/architecture/diagrams/ with Docker Compose architecture
+- [X] T211 [P] Create architecture-overview.puml in docs/architecture/diagrams/ with component diagram
+- [X] T212 [P] Create data-flow.puml in docs/architecture/diagrams/ with transaction flow sequence
+- [X] T213 [P] Create deployment.puml in docs/architecture/diagrams/ with Docker Compose architecture
 
 ### Database Documentation
 
-- [ ] T214 [P] Create schema.md in docs/architecture/database/ with entity documentation from data-model.md
-- [ ] T215 [P] Create indexing-strategy.md in docs/architecture/database/ with index justifications
+- [X] T214 [P] Create schema.md in docs/architecture/database/ with entity documentation from data-model.md
+- [X] T215 [P] Create indexing-strategy.md in docs/architecture/database/ with index justifications
 
 ### Runbooks
 
-- [ ] T216 [P] Create troubleshooting.md in docs/runbooks/ with common issues and solutions
-- [ ] T217 [P] Create performance-tuning.md in docs/runbooks/ with HikariCP tuning, query optimization
+- [X] T216 [P] Create troubleshooting.md in docs/runbooks/ with common issues and solutions
+- [X] T217 [P] Create performance-tuning.md in docs/runbooks/ with HikariCP tuning, query optimization
 
 ### Final Testing
 
