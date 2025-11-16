@@ -152,11 +152,79 @@ management:
     redis:
       enabled: true
 
-# OpenTelemetry Tracing
+# OpenTelemetry Tracing (T150-T153: Distributed Tracing)
 management.tracing:
   enabled: ${TRACING_ENABLED:true}
   sampling:
     probability: ${TRACING_SAMPLE_RATE:1.0}
+
+# OpenTelemetry Configuration
+otel:
+  # Service name for traces
+  service:
+    name: ${spring.application.name}
+
+  # Resource attributes
+  resource:
+    attributes:
+      deployment.environment: ${ENVIRONMENT:dev}
+      service.version: ${project.version:1.0.0}
+      service.namespace: oltp-demo
+
+  # OTLP Exporter Configuration
+  exporter:
+    otlp:
+      # Jaeger endpoint (OTLP gRPC)
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4317}
+      # Compression (gzip or none)
+      compression: gzip
+      # Timeout
+      timeout: 10s
+      # Headers for authentication (if needed)
+      headers: ${OTEL_EXPORTER_OTLP_HEADERS:}
+
+  # Traces Configuration
+  traces:
+    exporter: otlp
+
+  # Metrics Configuration (optional - for OTLP metrics export)
+  metrics:
+    exporter: ${OTEL_METRICS_EXPORTER:prometheus}
+
+  # Logs Configuration (optional)
+  logs:
+    exporter: ${OTEL_LOGS_EXPORTER:none}
+
+  # Instrumentation Configuration
+  instrumentation:
+    # JDBC/Database tracing
+    jdbc:
+      enabled: true
+      statement-sanitizer:
+        enabled: true
+    # HTTP client/server tracing
+    http:
+      client:
+        enabled: true
+        capture-request-headers: X-Correlation-ID,User-Agent
+        capture-response-headers: X-Correlation-ID
+      server:
+        enabled: true
+        capture-request-headers: X-Correlation-ID,User-Agent
+        capture-response-headers: X-Correlation-ID
+    # Spring annotations
+    spring:
+      enabled: true
+    # JPA tracing
+    jpa:
+      enabled: true
+
+  # Propagators (W3C Trace Context and Baggage)
+  propagators: tracecontext,baggage
+
+  # SDK Configuration
+  sdk:
+    disabled: false
 
 # Server Configuration
 server:

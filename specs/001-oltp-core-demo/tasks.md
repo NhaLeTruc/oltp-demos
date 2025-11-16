@@ -339,10 +339,10 @@ All paths are from repository root:
 
 #### Distributed Tracing
 
-- [ ] T150 [P] [US4] Add OpenTelemetry Java agent configuration to pom.xml
-- [ ] T151 [US4] Configure trace propagation in CorrelationIdFilter
-- [ ] T152 [US4] Add trace spans to service methods with @WithSpan annotation
-- [ ] T153 [US4] Add database query tracing with p6spy or similar
+- [X] T150 [P] [US4] Add OpenTelemetry Java agent configuration to pom.xml
+- [X] T151 [US4] Configure trace propagation in CorrelationIdFilter
+- [X] T152 [US4] Add trace spans to service methods with @WithSpan annotation
+- [X] T153 [US4] Add database query tracing with p6spy or similar
 
 #### Slow Query Logging
 

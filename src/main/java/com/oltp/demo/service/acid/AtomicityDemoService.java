@@ -15,6 +15,9 @@ import com.oltp.demo.repository.TransferLogRepository;
 import com.oltp.demo.util.CorrelationIdFilter;
 import com.oltp.demo.util.MetricsHelper;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -72,9 +75,17 @@ public class AtomicityDemoService {
      * @throws InsufficientFundsException if balance insufficient
      */
     @Transactional
+    @WithSpan("atomicity.transfer.successful")  // T152: Add OpenTelemetry span
     public TransferResult successfulTransfer(Long fromAccountId, Long toAccountId, BigDecimal amount) {
         long startTime = System.currentTimeMillis();
         String correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+
+        // T152: Add span attributes for distributed tracing
+        Span currentSpan = Span.current();
+        currentSpan.setAttribute("transfer.from_account_id", fromAccountId);
+        currentSpan.setAttribute("transfer.to_account_id", toAccountId);
+        currentSpan.setAttribute("transfer.amount", amount.toString());
+        currentSpan.setAttribute("correlation.id", correlationId != null ? correlationId : "none");
 
         log.info("Starting atomic transfer: from={}, to={}, amount={}, correlationId={}",
                 fromAccountId, toAccountId, amount, correlationId);
@@ -177,8 +188,16 @@ public class AtomicityDemoService {
      * @throws InsufficientFundsException always (demonstrates rollback)
      */
     @Transactional
+    @WithSpan("atomicity.transfer.insufficient_funds")  // T152: Add OpenTelemetry span
     public TransferResult failedTransferInsufficientFunds(Long fromAccountId, Long toAccountId, BigDecimal amount) {
         String correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+
+        // T152: Add span attributes
+        Span currentSpan = Span.current();
+        currentSpan.setAttribute("transfer.from_account_id", fromAccountId);
+        currentSpan.setAttribute("transfer.to_account_id", toAccountId);
+        currentSpan.setAttribute("transfer.amount", amount.toString());
+        currentSpan.setAttribute("transfer.expected_failure", "insufficient_funds");
 
         log.info("Demonstrating rollback on insufficient funds: from={}, to={}, amount={}",
                 fromAccountId, toAccountId, amount);
@@ -234,6 +253,7 @@ public class AtomicityDemoService {
      * @return transfer result
      */
     @Transactional
+    @WithSpan("atomicity.transfer.mid_transaction_failure")  // T152: Add OpenTelemetry span
     public TransferResult transferWithMidTransactionFailure(
             Long fromAccountId,
             Long toAccountId,
@@ -241,6 +261,13 @@ public class AtomicityDemoService {
             boolean simulateFailureAfterDebit) {
 
         String correlationId = CorrelationIdFilter.getCurrentCorrelationId();
+
+        // T152: Add span attributes
+        Span currentSpan = Span.current();
+        currentSpan.setAttribute("transfer.from_account_id", fromAccountId);
+        currentSpan.setAttribute("transfer.to_account_id", toAccountId);
+        currentSpan.setAttribute("transfer.amount", amount.toString());
+        currentSpan.setAttribute("transfer.simulate_failure", simulateFailureAfterDebit);
 
         log.info("Demonstrating mid-transaction failure: from={}, to={}, amount={}, simulateFailure={}",
                 fromAccountId, toAccountId, amount, simulateFailureAfterDebit);

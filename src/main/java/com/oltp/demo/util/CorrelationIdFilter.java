@@ -16,6 +16,12 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.api.baggage.Baggage;
+import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -66,6 +72,9 @@ public class CorrelationIdFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+        // Get current span (created by OpenTelemetry auto-instrumentation)
+        Span currentSpan = Span.current();
+
         try {
             // Extract or generate correlation ID
             String correlationId = extractOrGenerateCorrelationId(httpRequest);
@@ -76,11 +85,37 @@ public class CorrelationIdFilter implements Filter {
             // Add to response header for client tracking
             httpResponse.setHeader(CORRELATION_ID_HEADER, correlationId);
 
-            log.debug("Processing request with correlationId: {}", correlationId);
+            // T151: Add correlation ID to OpenTelemetry span attributes
+            // This makes correlation ID searchable in Jaeger and other tracing UIs
+            currentSpan.setAttribute("correlation.id", correlationId);
+            currentSpan.setAttribute("http.request.method", httpRequest.getMethod());
+            currentSpan.setAttribute("http.request.uri", httpRequest.getRequestURI());
 
-            // Continue filter chain
-            chain.doFilter(request, response);
+            // Add correlation ID to OpenTelemetry Baggage for cross-service propagation
+            // Baggage is automatically propagated to downstream services
+            Context contextWithBaggage = Context.current().with(
+                Baggage.builder()
+                    .put("correlation.id", correlationId)
+                    .build()
+            );
 
+            log.debug("Processing request with correlationId: {} traceId: {} spanId: {}",
+                correlationId, currentSpan.getSpanContext().getTraceId(),
+                currentSpan.getSpanContext().getSpanId());
+
+            // Continue filter chain with updated context
+            try (Scope scope = contextWithBaggage.makeCurrent()) {
+                chain.doFilter(request, response);
+            }
+
+            // Mark span as successful
+            currentSpan.setStatus(StatusCode.OK);
+
+        } catch (Exception e) {
+            // Record exception in span
+            currentSpan.recordException(e);
+            currentSpan.setStatus(StatusCode.ERROR, "Request processing failed: " + e.getMessage());
+            throw e;
         } finally {
             // CRITICAL: Always clean up MDC to prevent memory leaks
             // MDC is thread-local, so we must clear it after request
