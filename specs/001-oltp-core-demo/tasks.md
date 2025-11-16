@@ -304,16 +304,16 @@ All paths are from repository root:
 
 #### Load Testing Scripts
 
-- [ ] T138 [P] [US3] Create locustfile.py in loadtest/locust/ with base Locust configuration
-- [ ] T139 [P] [US3] Create performance_demo.py in loadtest/locust/scenarios/ with connection pooling load test
-- [ ] T140 [P] [US3] Create OltpDemoSimulation.scala in loadtest/gatling/simulations/ with Gatling scenarios
-- [ ] T141 [P] [US3] Create requirements.txt in loadtest/locust/ with Locust dependencies
+- [X] T138 [P] [US3] Create locustfile.py in loadtest/locust/ with base Locust configuration
+- [X] T139 [P] [US3] Create performance_demo.py in loadtest/locust/scenarios/ with connection pooling load test
+- [X] T140 [P] [US3] Create OltpDemoSimulation.scala in loadtest/gatling/simulations/ with Gatling scenarios
+- [X] T141 [P] [US3] Create requirements.txt in loadtest/locust/ with Locust dependencies
 
 #### Documentation
 
-- [ ] T142 [P] [US3] Create connection-pooling.md in docs/demonstrations/performance/ with before/after metrics
-- [ ] T143 [P] [US3] Create batching.md in docs/demonstrations/performance/ with throughput comparisons
-- [ ] T144 [P] [US3] Create caching.md in docs/demonstrations/performance/ with cache hit ratio analysis
+- [X] T142 [P] [US3] Create connection-pooling.md in docs/demonstrations/performance/ with before/after metrics
+- [X] T143 [P] [US3] Create batching.md in docs/demonstrations/performance/ with throughput comparisons
+- [X] T144 [P] [US3] Create caching.md in docs/demonstrations/performance/ with cache hit ratio analysis
 
 **Checkpoint**: User Story 3 complete - Performance demonstrations fully functional with measurable improvements
 

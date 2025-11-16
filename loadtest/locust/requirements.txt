@@ -1,0 +1,50 @@
+# Locust Load Testing Dependencies
+# For OLTP Demo Performance Testing
+#
+# Installation:
+#   pip install -r requirements.txt
+#
+# Usage:
+#   locust -f locustfile.py --host=http://localhost:8080
+#
+# See: specs/001-oltp-core-demo/spec.md - US3: Performance Under Load
+
+# Core load testing framework
+locust>=2.15.0,<3.0.0
+
+# HTTP client with connection pooling
+requests>=2.31.0,<3.0.0
+
+# Data generation and manipulation
+Faker>=20.0.0,<21.0.0
+
+# Performance metrics and statistics
+numpy>=1.24.0,<2.0.0
+scipy>=1.10.0,<2.0.0
+
+# Distributed testing support
+pyzmq>=25.0.0,<26.0.0
+gevent>=23.0.0,<24.0.0
+
+# Logging and monitoring
+colorlog>=6.7.0,<7.0.0
+
+# Configuration management
+pyyaml>=6.0.0,<7.0.0
+python-dotenv>=1.0.0,<2.0.0
+
+# Data export and reporting
+pandas>=2.0.0,<3.0.0
+
+# Optional: Advanced metrics collection
+# prometheus-client>=0.18.0,<1.0.0
+# influxdb-client>=1.36.0,<2.0.0
+
+# Optional: Response validation
+# jsonschema>=4.20.0,<5.0.0
+
+# Development dependencies (optional)
+# pytest>=7.4.0,<8.0.0
+# pytest-cov>=4.1.0,<5.0.0
+# black>=23.0.0,<24.0.0
+# flake8>=6.1.0,<7.0.0
