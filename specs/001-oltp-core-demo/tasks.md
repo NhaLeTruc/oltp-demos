@@ -251,32 +251,32 @@ All paths are from repository root:
 
 #### Connection Pooling Demonstrations
 
-- [ ] T109 [P] [US3] Create ConnectionPoolingService in src/main/java/com/oltp/demo/service/performance/ConnectionPoolingService.java
-- [ ] T110 [US3] Implement pooled connection query execution in ConnectionPoolingService
-- [ ] T111 [US3] Implement unpooled connection query execution for comparison in ConnectionPoolingService
-- [ ] T112 [US3] Implement HikariCP pool statistics collection in ConnectionPoolingService
+- [X] T109 [P] [US3] Create ConnectionPoolingService in src/main/java/com/oltp/demo/service/performance/ConnectionPoolingService.java
+- [X] T110 [US3] Implement pooled connection query execution in ConnectionPoolingService
+- [X] T111 [US3] Implement unpooled connection query execution for comparison in ConnectionPoolingService
+- [X] T112 [US3] Implement HikariCP pool statistics collection in ConnectionPoolingService
 
 #### Batch Operation Demonstrations
 
-- [ ] T113 [P] [US3] Create BatchOperationService in src/main/java/com/oltp/demo/service/performance/BatchOperationService.java
-- [ ] T114 [US3] Implement individual insert operations in BatchOperationService
-- [ ] T115 [US3] Implement JDBC batch insert operations in BatchOperationService
-- [ ] T116 [US3] Implement throughput measurement and comparison in BatchOperationService
+- [X] T113 [P] [US3] Create BatchOperationService in src/main/java/com/oltp/demo/service/performance/BatchOperationService.java
+- [X] T114 [US3] Implement individual insert operations in BatchOperationService
+- [X] T115 [US3] Implement JDBC batch insert operations in BatchOperationService
+- [X] T116 [US3] Implement throughput measurement and comparison in BatchOperationService
 
 #### Caching Demonstrations
 
-- [ ] T117 [P] [US3] Create CachingService in src/main/java/com/oltp/demo/service/performance/CachingService.java
-- [ ] T118 [US3] Implement Redis cache integration with Spring @Cacheable in CachingService
-- [ ] T119 [US3] Implement cache hit/miss tracking in CachingService
-- [ ] T120 [US3] Implement manual cache invalidation demonstration in CachingService
-- [ ] T121 [US3] Implement TTL-based expiration demonstration in CachingService
+- [X] T117 [P] [US3] Create CachingService in src/main/java/com/oltp/demo/service/performance/CachingService.java
+- [X] T118 [US3] Implement Redis cache integration with Spring @Cacheable in CachingService
+- [X] T119 [US3] Implement cache hit/miss tracking in CachingService
+- [X] T120 [US3] Implement manual cache invalidation demonstration in CachingService
+- [X] T121 [US3] Implement TTL-based expiration demonstration in CachingService
 
 #### Indexing Demonstrations
 
-- [ ] T122 [P] [US3] Create IndexingDemoService in src/main/java/com/oltp/demo/service/performance/IndexingDemoService.java
-- [ ] T123 [US3] Implement indexed query with EXPLAIN ANALYZE in IndexingDemoService
-- [ ] T124 [US3] Implement full table scan query for comparison in IndexingDemoService
-- [ ] T125 [US3] Implement query plan parsing and metrics extraction in IndexingDemoService
+- [X] T122 [P] [US3] Create IndexingDemoService in src/main/java/com/oltp/demo/service/performance/IndexingDemoService.java
+- [X] T123 [US3] Implement indexed query with EXPLAIN ANALYZE in IndexingDemoService
+- [X] T124 [US3] Implement full table scan query for comparison in IndexingDemoService
+- [X] T125 [US3] Implement query plan parsing and metrics extraction in IndexingDemoService
 
 #### jOOQ Advanced Queries
 
@@ -286,11 +286,11 @@ All paths are from repository root:
 
 #### REST API Endpoints
 
-- [ ] T129 [P] [US3] Create PerformanceDemoController in src/main/java/com/oltp/demo/controller/PerformanceDemoController.java
-- [ ] T130 [US3] Implement GET /api/demos/performance/connection-pooling endpoint in PerformanceDemoController
-- [ ] T131 [US3] Implement POST /api/demos/performance/batch-operations endpoint in PerformanceDemoController
-- [ ] T132 [US3] Implement GET /api/demos/performance/caching endpoint in PerformanceDemoController
-- [ ] T133 [US3] Implement GET /api/demos/performance/indexing endpoint in PerformanceDemoController
+- [X] T129 [P] [US3] Create PerformanceDemoController in src/main/java/com/oltp/demo/controller/PerformanceDemoController.java
+- [X] T130 [US3] Implement GET /api/demos/performance/connection-pooling endpoint in PerformanceDemoController
+- [X] T131 [US3] Implement POST /api/demos/performance/batch-operations endpoint in PerformanceDemoController
+- [X] T132 [US3] Implement GET /api/demos/performance/caching endpoint in PerformanceDemoController
+- [X] T133 [US3] Implement GET /api/demos/performance/indexing endpoint in PerformanceDemoController
 
 #### JMH Benchmarks
 
