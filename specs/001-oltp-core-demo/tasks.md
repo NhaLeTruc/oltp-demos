@@ -294,13 +294,13 @@ All paths are from repository root:
 
 #### JMH Benchmarks
 
-- [ ] T134 [P] [US3] Create QueryPerformanceBenchmark in src/test/java/com/oltp/demo/performance/QueryPerformanceBenchmark.java with JMH annotations
-- [ ] T135 [P] [US3] Create ConnectionPoolBenchmark in src/test/java/com/oltp/demo/performance/ConnectionPoolBenchmark.java with HdrHistogram
+- [X] T134 [P] [US3] Create QueryPerformanceBenchmark in src/test/java/com/oltp/demo/performance/QueryPerformanceBenchmark.java with JMH annotations
+- [X] T135 [P] [US3] Create ConnectionPoolBenchmark in src/test/java/com/oltp/demo/performance/ConnectionPoolBenchmark.java with HdrHistogram
 
 #### Integration Tests
 
-- [ ] T136 [P] [US3] Create ConnectionPoolBenchmarkTest in src/test/java/com/oltp/demo/integration/performance/ConnectionPoolBenchmarkTest.java
-- [ ] T137 [P] [US3] Create BatchOperationBenchmarkTest in src/test/java/com/oltp/demo/integration/performance/BatchOperationBenchmarkTest.java
+- [X] T136 [P] [US3] Create ConnectionPoolBenchmarkTest in src/test/java/com/oltp/demo/integration/performance/ConnectionPoolBenchmarkTest.java
+- [X] T137 [P] [US3] Create BatchOperationBenchmarkTest in src/test/java/com/oltp/demo/integration/performance/BatchOperationBenchmarkTest.java
 
 #### Load Testing Scripts
 
