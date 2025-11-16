@@ -371,11 +371,11 @@ All paths are from repository root:
 
 #### Documentation
 
-- [ ] T167 [P] [US4] Create metrics.md in docs/demonstrations/observability/ with Prometheus queries
-- [ ] T168 [P] [US4] Create logging.md in docs/demonstrations/observability/ with log analysis examples
-- [ ] T169 [P] [US4] Create tracing.md in docs/demonstrations/observability/ with Jaeger UI screenshots
+- [X] T167 [P] [US4] Create metrics.md in docs/demonstrations/observability/ with Prometheus queries
+- [X] T168 [P] [US4] Create logging.md in docs/demonstrations/observability/ with log analysis examples
+- [X] T169 [P] [US4] Create tracing.md in docs/demonstrations/observability/ with Jaeger UI screenshots
 
-**Checkpoint**: User Story 4 complete - Observability fully instrumented with metrics, logs, and traces
+**Checkpoint**: User Story 4 complete ✓ - Observability fully instrumented with metrics, logs, and traces
 
 ---
 
