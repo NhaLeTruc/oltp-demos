@@ -358,9 +358,9 @@ All paths are from repository root:
 
 #### Grafana Dashboards
 
-- [ ] T160 [P] [US4] Create oltp-overview.json in infrastructure/docker/grafana/dashboards/ with transaction metrics
-- [ ] T161 [P] [US4] Create database-metrics.json in infrastructure/docker/grafana/dashboards/ with PostgreSQL metrics
-- [ ] T162 [P] [US4] Create jvm-metrics.json in infrastructure/docker/grafana/dashboards/ with JVM heap, GC, threads
+- [X] T160 [P] [US4] Create oltp-overview.json in infrastructure/docker/grafana/dashboards/ with transaction metrics
+- [X] T161 [P] [US4] Create database-metrics.json in infrastructure/docker/grafana/dashboards/ with PostgreSQL metrics
+- [X] T162 [P] [US4] Create jvm-metrics.json in infrastructure/docker/grafana/dashboards/ with JVM heap, GC, threads
 
 #### Integration Tests
 
