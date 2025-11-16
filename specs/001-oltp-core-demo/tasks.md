@@ -438,10 +438,10 @@ All paths are from repository root:
 
 #### Documentation
 
-- [ ] T196 [P] [US5] Create failure-handling.md in docs/demonstrations/failure/ with retry patterns
-- [ ] T197 [P] [US5] Create recovery.md in docs/demonstrations/failure/ with crash recovery procedure
+- [X] T196 [P] [US5] Create failure-handling.md in docs/demonstrations/failure/ with retry patterns
+- [X] T197 [P] [US5] Create recovery.md in docs/demonstrations/failure/ with crash recovery procedure
 
-**Checkpoint**: User Story 5 complete - Failure scenarios and recovery fully demonstrated
+**Checkpoint**: User Story 5 complete ✓ - Failure scenarios and recovery fully demonstrated
 
 ---
 
