@@ -187,24 +187,24 @@ All paths are from repository root:
 
 #### Optimistic Locking Demonstrations
 
-- [ ] T080 [P] [US2] Create OptimisticLockingService in src/main/java/com/oltp/demo/service/concurrency/OptimisticLockingService.java
-- [ ] T081 [US2] Implement concurrent update with version checking in OptimisticLockingService
-- [ ] T082 [US2] Implement retry logic with exponential backoff in OptimisticLockingService
-- [ ] T083 [US2] Implement conflict detection counter and metrics in OptimisticLockingService
+- [X] T080 [P] [US2] Create OptimisticLockingService in src/main/java/com/oltp/demo/service/concurrency/OptimisticLockingService.java
+- [X] T081 [US2] Implement concurrent update with version checking in OptimisticLockingService
+- [X] T082 [US2] Implement retry logic with exponential backoff in OptimisticLockingService
+- [X] T083 [US2] Implement conflict detection counter and metrics in OptimisticLockingService
 
 #### Pessimistic Locking Demonstrations
 
-- [ ] T084 [P] [US2] Create PessimisticLockingService in src/main/java/com/oltp/demo/service/concurrency/PessimisticLockingService.java
-- [ ] T085 [US2] Implement SELECT FOR UPDATE lock acquisition in PessimisticLockingService
-- [ ] T086 [US2] Implement lock wait time measurement in PessimisticLockingService
-- [ ] T087 [US2] Implement serialized transaction execution demo in PessimisticLockingService
+- [X] T084 [P] [US2] Create PessimisticLockingService in src/main/java/com/oltp/demo/service/concurrency/PessimisticLockingService.java
+- [X] T085 [US2] Implement SELECT FOR UPDATE lock acquisition in PessimisticLockingService
+- [X] T086 [US2] Implement lock wait time measurement in PessimisticLockingService
+- [X] T087 [US2] Implement serialized transaction execution demo in PessimisticLockingService
 
 #### Deadlock Demonstrations
 
-- [ ] T088 [P] [US2] Create DeadlockDemoService in src/main/java/com/oltp/demo/service/concurrency/DeadlockDemoService.java
-- [ ] T089 [US2] Implement bidirectional transfer deadlock scenario (A→B and B→A) in DeadlockDemoService
-- [ ] T090 [US2] Implement deadlock detection handler with retry in DeadlockDemoService
-- [ ] T091 [US2] Implement deadlock metrics tracking in DeadlockDemoService
+- [X] T088 [P] [US2] Create DeadlockDemoService in src/main/java/com/oltp/demo/service/concurrency/DeadlockDemoService.java
+- [X] T089 [US2] Implement bidirectional transfer deadlock scenario (A→B and B→A) in DeadlockDemoService
+- [X] T090 [US2] Implement deadlock detection handler with retry in DeadlockDemoService
+- [X] T091 [US2] Implement deadlock metrics tracking in DeadlockDemoService
 
 #### Isolation Level Demonstrations
 
@@ -216,17 +216,17 @@ All paths are from repository root:
 
 #### REST API Endpoints
 
-- [ ] T097 [P] [US2] Create ConcurrencyDemoController in src/main/java/com/oltp/demo/controller/ConcurrencyDemoController.java
-- [ ] T098 [US2] Implement POST /api/demos/concurrency/optimistic-locking endpoint in ConcurrencyDemoController
-- [ ] T099 [US2] Implement POST /api/demos/concurrency/pessimistic-locking endpoint in ConcurrencyDemoController
-- [ ] T100 [US2] Implement POST /api/demos/concurrency/deadlock endpoint in ConcurrencyDemoController
+- [X] T097 [P] [US2] Create ConcurrencyDemoController in src/main/java/com/oltp/demo/controller/ConcurrencyDemoController.java
+- [X] T098 [US2] Implement POST /api/demos/concurrency/optimistic-locking endpoint in ConcurrencyDemoController
+- [X] T099 [US2] Implement POST /api/demos/concurrency/pessimistic-locking endpoint in ConcurrencyDemoController
+- [X] T100 [US2] Implement POST /api/demos/concurrency/deadlock endpoint in ConcurrencyDemoController
 - [ ] T101 [US2] Implement GET /api/demos/concurrency/isolation-levels endpoint in ConcurrencyDemoController
 
 #### Integration Tests
 
-- [ ] T102 [P] [US2] Create OptimisticLockingTest in src/test/java/com/oltp/demo/integration/concurrency/OptimisticLockingTest.java
-- [ ] T103 [P] [US2] Create PessimisticLockingTest in src/test/java/com/oltp/demo/integration/concurrency/PessimisticLockingTest.java
-- [ ] T104 [P] [US2] Create DeadlockTest in src/test/java/com/oltp/demo/integration/concurrency/DeadlockTest.java
+- [X] T102 [P] [US2] Create OptimisticLockingTest in src/test/java/com/oltp/demo/integration/concurrency/OptimisticLockingTest.java
+- [X] T103 [P] [US2] Create PessimisticLockingTest in src/test/java/com/oltp/demo/integration/concurrency/PessimisticLockingTest.java
+- [X] T104 [P] [US2] Create DeadlockTest in src/test/java/com/oltp/demo/integration/concurrency/DeadlockTest.java
 - [ ] T105 [P] [US2] Create ConcurrentAccessTest in src/test/java/com/oltp/demo/integration/concurrency/ConcurrentAccessTest.java with 100+ parallel clients using ExecutorService
 
 #### Documentation
