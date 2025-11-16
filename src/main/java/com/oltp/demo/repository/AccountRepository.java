@@ -133,4 +133,16 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
            "LEFT JOIN FETCH a.accountType " +
            "WHERE a.id = :id")
     Optional<Account> findByIdWithDetails(@Param("id") Long id);
+
+    /**
+     * Count accounts with balance greater than the specified amount.
+     *
+     * Used for phantom read demonstrations to show how range queries behave
+     * under different isolation levels.
+     *
+     * @param minBalance the minimum balance threshold
+     * @return count of accounts with balance > minBalance
+     */
+    @Query("SELECT COUNT(a) FROM Account a WHERE a.balance > :minBalance")
+    int countByBalanceGreaterThan(@Param("minBalance") java.math.BigDecimal minBalance);
 }

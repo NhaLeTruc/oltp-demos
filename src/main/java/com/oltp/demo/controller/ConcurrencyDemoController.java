@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.oltp.demo.service.concurrency.DeadlockDemoService;
+import com.oltp.demo.service.concurrency.IsolationLevelService;
 import com.oltp.demo.service.concurrency.OptimisticLockingService;
 import com.oltp.demo.service.concurrency.PessimisticLockingService;
 
@@ -47,6 +48,7 @@ public class ConcurrencyDemoController {
     private final OptimisticLockingService optimisticLockingService;
     private final PessimisticLockingService pessimisticLockingService;
     private final DeadlockDemoService deadlockDemoService;
+    private final IsolationLevelService isolationLevelService;
 
     // =========================================================================
     // Optimistic Locking Demonstrations
@@ -206,6 +208,106 @@ public class ConcurrencyDemoController {
     }
 
     // =========================================================================
+    // Isolation Level Demonstrations
+    // =========================================================================
+
+    @PostMapping("/isolation-levels/dirty-read")
+    @Operation(summary = "Demonstrate dirty read phenomenon",
+               description = "Shows READ_UNCOMMITTED isolation level behavior (PostgreSQL treats as READ_COMMITTED)")
+    public ResponseEntity<IsolationLevelService.DirtyReadResult> demonstrateDirtyRead(
+            @RequestBody IsolationLevelRequest request) {
+
+        log.info("API: Dirty read demo - account={}, tempAmount={}",
+                request.accountId, request.amount);
+
+        try {
+            IsolationLevelService.DirtyReadResult result =
+                isolationLevelService.demonstrateDirtyRead(
+                    request.accountId,
+                    request.amount
+                );
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("Dirty read demo failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/isolation-levels/non-repeatable-read")
+    @Operation(summary = "Demonstrate non-repeatable read phenomenon",
+               description = "Shows READ_COMMITTED isolation level behavior with concurrent updates")
+    public ResponseEntity<IsolationLevelService.NonRepeatableReadResult> demonstrateNonRepeatableRead(
+            @RequestBody IsolationLevelRequest request) {
+
+        log.info("API: Non-repeatable read demo - account={}, updateAmount={}",
+                request.accountId, request.amount);
+
+        try {
+            IsolationLevelService.NonRepeatableReadResult result =
+                isolationLevelService.demonstrateNonRepeatableRead(
+                    request.accountId,
+                    request.amount
+                );
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("Non-repeatable read demo failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/isolation-levels/phantom-read")
+    @Operation(summary = "Demonstrate phantom read phenomenon",
+               description = "Shows REPEATABLE_READ isolation level behavior (PostgreSQL prevents phantom reads)")
+    public ResponseEntity<IsolationLevelService.PhantomReadResult> demonstratePhantomRead(
+            @RequestBody PhantomReadRequest request) {
+
+        log.info("API: Phantom read demo - minBalance={}, newAccountBalance={}",
+                request.minBalance, request.newAccountBalance);
+
+        try {
+            IsolationLevelService.PhantomReadResult result =
+                isolationLevelService.demonstratePhantomRead(
+                    request.minBalance,
+                    request.newAccountBalance
+                );
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("Phantom read demo failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/isolation-levels/serializable")
+    @Operation(summary = "Demonstrate SERIALIZABLE isolation",
+               description = "Shows strictest isolation level with full consistency guarantees")
+    public ResponseEntity<IsolationLevelService.SerializableIsolationResult> demonstrateSerializable(
+            @RequestBody IsolationLevelRequest request) {
+
+        log.info("API: Serializable isolation demo - account={}, amount={}",
+                request.accountId, request.amount);
+
+        try {
+            IsolationLevelService.SerializableIsolationResult result =
+                isolationLevelService.demonstrateSerializable(
+                    request.accountId,
+                    request.amount
+                );
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("Serializable isolation demo failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // =========================================================================
     // Request DTOs
     // =========================================================================
 
@@ -230,5 +332,15 @@ public class ConcurrencyDemoController {
         boolean success,
         int deadlocksDetected,
         String message
+    ) {}
+
+    public record IsolationLevelRequest(
+        Long accountId,
+        BigDecimal amount
+    ) {}
+
+    public record PhantomReadRequest(
+        BigDecimal minBalance,
+        BigDecimal newAccountBalance
     ) {}
 }
