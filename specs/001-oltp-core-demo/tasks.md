@@ -391,50 +391,50 @@ All paths are from repository root:
 
 #### Retry Logic
 
-- [ ] T170 [P] [US5] Create RetryService in src/main/java/com/oltp/demo/service/failure/RetryService.java
-- [ ] T171 [US5] Implement connection retry with exponential backoff in RetryService using Spring Retry
-- [ ] T172 [US5] Implement retry metrics (attempts, successes, failures) in RetryService
-- [ ] T173 [US5] Implement max retry limit and fallback behavior in RetryService
+- [X] T170 [P] [US5] Create RetryService in src/main/java/com/oltp/demo/service/failure/RetryService.java
+- [X] T171 [US5] Implement connection retry with exponential backoff in RetryService using Spring Retry
+- [X] T172 [US5] Implement retry metrics (attempts, successes, failures) in RetryService
+- [X] T173 [US5] Implement max retry limit and fallback behavior in RetryService
 
 #### Circuit Breaker
 
-- [ ] T174 [P] [US5] Create CircuitBreakerService in src/main/java/com/oltp/demo/service/failure/CircuitBreakerService.java
-- [ ] T175 [US5] Implement circuit breaker pattern using Resilience4j in CircuitBreakerService
-- [ ] T176 [US5] Implement circuit breaker state transitions (CLOSED → OPEN → HALF_OPEN) in CircuitBreakerService
-- [ ] T177 [US5] Add circuit breaker metrics to MetricsHelper
+- [X] T174 [P] [US5] Create CircuitBreakerService in src/main/java/com/oltp/demo/service/failure/CircuitBreakerService.java
+- [X] T175 [US5] Implement circuit breaker pattern using Resilience4j in CircuitBreakerService
+- [X] T176 [US5] Implement circuit breaker state transitions (CLOSED → OPEN → HALF_OPEN) in CircuitBreakerService
+- [X] T177 [US5] Add circuit breaker metrics to MetricsHelper
 
 #### Crash Recovery
 
-- [ ] T178 [P] [US5] Create RecoveryDemoService in src/main/java/com/oltp/demo/service/failure/RecoveryDemoService.java
-- [ ] T179 [US5] Implement committed transaction verification after crash in RecoveryDemoService
-- [ ] T180 [US5] Implement WAL verification demonstration in RecoveryDemoService
-- [ ] T181 [US5] Implement point-in-time recovery query in RecoveryDemoService
+- [X] T178 [P] [US5] Create RecoveryDemoService in src/main/java/com/oltp/demo/service/failure/RecoveryDemoService.java
+- [X] T179 [US5] Implement committed transaction verification after crash in RecoveryDemoService
+- [X] T180 [US5] Implement WAL verification demonstration in RecoveryDemoService
+- [X] T181 [US5] Implement point-in-time recovery query in RecoveryDemoService
 
 #### Resource Exhaustion Handling
 
-- [ ] T182 [US5] Implement connection pool exhaustion detection in DatabaseConfig
-- [ ] T183 [US5] Implement graceful queue/reject logic for exhausted pool in RetryService
-- [ ] T184 [US5] Add connection pool wait time alerting in MetricsHelper
+- [X] T182 [US5] Implement connection pool exhaustion detection in DatabaseConfig
+- [X] T183 [US5] Implement graceful queue/reject logic for exhausted pool in DatabaseConfig
+- [X] T184 [US5] Add connection pool wait time alerting in MetricsHelper
 
 #### REST API Endpoints
 
-- [ ] T185 [P] [US5] Create FailureDemoController in src/main/java/com/oltp/demo/controller/FailureDemoController.java
-- [ ] T186 [US5] Implement POST /api/demos/failure/retry endpoint in FailureDemoController
-- [ ] T187 [US5] Implement POST /api/demos/failure/circuit-breaker endpoint in FailureDemoController
-- [ ] T188 [US5] Implement GET /api/demos/failure/recovery endpoint in FailureDemoController
+- [X] T185 [P] [US5] Create FailureDemoController in src/main/java/com/oltp/demo/controller/FailureDemoController.java
+- [X] T186 [US5] Implement POST /api/demos/failure/retry endpoint in FailureDemoController
+- [X] T187 [US5] Implement POST /api/demos/failure/circuit-breaker endpoint in FailureDemoController
+- [X] T188 [US5] Implement GET /api/demos/failure/recovery endpoint in FailureDemoController
 
 #### Chaos Engineering Scripts
 
-- [ ] T189 [P] [US5] Create kill-db.sh in infrastructure/scripts/chaos/ to simulate database crash
-- [ ] T190 [P] [US5] Create network-latency.sh in infrastructure/scripts/chaos/ to inject delays with tc or toxiproxy
-- [ ] T191 [P] [US5] Create connection-exhaust.sh in infrastructure/scripts/chaos/ to simulate pool exhaustion
+- [X] T189 [P] [US5] Create kill-db.sh in infrastructure/scripts/chaos/ to simulate database crash
+- [X] T190 [P] [US5] Create network-latency.sh in infrastructure/scripts/chaos/ to inject delays with tc or toxiproxy
+- [X] T191 [P] [US5] Create connection-exhaust.sh in infrastructure/scripts/chaos/ to simulate pool exhaustion
 
 #### Integration Tests
 
-- [ ] T192 [P] [US5] Create FailureRecoveryIntegrationTest in src/test/java/com/oltp/demo/integration/failure/FailureRecoveryIntegrationTest.java
-- [ ] T193 [US5] Test connection retry with Testcontainers pause/unpause in FailureRecoveryIntegrationTest
-- [ ] T194 [US5] Test crash recovery with Testcontainers restart in FailureRecoveryIntegrationTest
-- [ ] T195 [US5] Test circuit breaker state transitions in FailureRecoveryIntegrationTest
+- [X] T192 [P] [US5] Create FailureRecoveryIntegrationTest in src/test/java/com/oltp/demo/integration/failure/FailureRecoveryIntegrationTest.java
+- [X] T193 [US5] Test connection retry with Testcontainers pause/unpause in FailureRecoveryIntegrationTest
+- [X] T194 [US5] Test crash recovery with Testcontainers restart in FailureRecoveryIntegrationTest
+- [X] T195 [US5] Test circuit breaker state transitions in FailureRecoveryIntegrationTest
 
 #### Documentation
 
