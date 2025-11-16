@@ -27,18 +27,18 @@ All paths are from repository root:
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create Maven project with Spring Boot 3.2+ parent POM in pom.xml
-- [ ] T002 [P] Configure Maven wrapper scripts (mvnw, mvnw.cmd) in .mvn/wrapper/
-- [ ] T003 [P] Create .gitignore with Java, Maven, IDE, and OS-specific entries
-- [ ] T004 [P] Create project directory structure per plan.md (src/, loadtest/, infrastructure/, docs/)
-- [ ] T005 [P] Add Spring Boot dependencies in pom.xml: spring-boot-starter-web, spring-boot-starter-data-jpa, spring-boot-starter-actuator
-- [ ] T006 [P] Add database dependencies in pom.xml: postgresql, flyway-core, HikariCP
-- [ ] T007 [P] Add observability dependencies in pom.xml: micrometer-registry-prometheus, spring-boot-starter-aop, logstash-logback-encoder
-- [ ] T008 [P] Add testing dependencies in pom.xml: spring-boot-starter-test, testcontainers, testcontainers-postgresql, archunit-junit5, JMH
-- [ ] T009 [P] Add jOOQ code generation plugin in pom.xml with PostgreSQL configuration
-- [ ] T010 [P] Create Spring Boot main class in src/main/java/com/oltp/demo/OltpDemoApplication.java
-- [ ] T011 [P] Create README.md with project overview and quickstart from specs/001-oltp-core-demo/quickstart.md
-- [ ] T012 [P] Create CONTRIBUTING.md with development guidelines and constitution reference
+- [X] T001 Create Maven project with Spring Boot 3.2+ parent POM in pom.xml
+- [X] T002 [P] Configure Maven wrapper scripts (mvnw, mvnw.cmd) in .mvn/wrapper/
+- [X] T003 [P] Create .gitignore with Java, Maven, IDE, and OS-specific entries
+- [X] T004 [P] Create project directory structure per plan.md (src/, loadtest/, infrastructure/, docs/)
+- [X] T005 [P] Add Spring Boot dependencies in pom.xml: spring-boot-starter-web, spring-boot-starter-data-jpa, spring-boot-starter-actuator
+- [X] T006 [P] Add database dependencies in pom.xml: postgresql, flyway-core, HikariCP
+- [X] T007 [P] Add observability dependencies in pom.xml: micrometer-registry-prometheus, spring-boot-starter-aop, logstash-logback-encoder
+- [X] T008 [P] Add testing dependencies in pom.xml: spring-boot-starter-test, testcontainers, testcontainers-postgresql, archunit-junit5, JMH
+- [X] T009 [P] Add jOOQ code generation plugin in pom.xml with PostgreSQL configuration
+- [X] T010 [P] Create Spring Boot main class in src/main/java/com/oltp/demo/OltpDemoApplication.java
+- [X] T011 [P] Create README.md with project overview and quickstart from specs/001-oltp-core-demo/quickstart.md
+- [X] T012 [P] Create CONTRIBUTING.md with development guidelines and constitution reference
 
 ---
 
@@ -50,60 +50,60 @@ All paths are from repository root:
 
 ### Configuration & Infrastructure
 
-- [ ] T013 Create base application.yml in src/main/resources/ with datasource, JPA, Flyway, HikariCP configuration
-- [ ] T014 [P] Create application-dev.yml in src/main/resources/ with development-specific settings
-- [ ] T015 [P] Create logback-spring.xml in src/main/resources/ with JSON logging and MDC configuration
-- [ ] T016 Create DatabaseConfig in src/main/java/com/oltp/demo/config/DatabaseConfig.java with HikariCP datasource bean
-- [ ] T017 [P] Create SecurityConfig in src/main/java/com/oltp/demo/config/SecurityConfig.java with database user setup
-- [ ] T018 [P] Create ObservabilityConfig in src/main/java/com/oltp/demo/config/ObservabilityConfig.java with Micrometer customization
-- [ ] T019 [P] Create CacheConfig in src/main/java/com/oltp/demo/config/CacheConfig.java with Redis connection configuration
+- [X] T013 Create base application.yml in src/main/resources/ with datasource, JPA, Flyway, HikariCP configuration
+- [X] T014 [P] Create application-dev.yml in src/main/resources/ with development-specific settings
+- [X] T015 [P] Create logback-spring.xml in src/main/resources/ with JSON logging and MDC configuration
+- [X] T016 Create DatabaseConfig in src/main/java/com/oltp/demo/config/DatabaseConfig.java with HikariCP datasource bean
+- [X] T017 [P] Create SecurityConfig in src/main/java/com/oltp/demo/config/SecurityConfig.java with database user setup
+- [X] T018 [P] Create ObservabilityConfig in src/main/java/com/oltp/demo/config/ObservabilityConfig.java with Micrometer customization
+- [X] T019 [P] Create CacheConfig in src/main/java/com/oltp/demo/config/CacheConfig.java with Redis connection configuration
 
 ### Database Schema & Migrations
 
-- [ ] T020 Create V1__create_schema.sql in src/main/resources/db/migration/ with users, account_types, accounts tables
-- [ ] T021 Create V2__create_transaction_tables.sql in src/main/resources/db/migration/ with transactions, transfer_logs tables
-- [ ] T022 Create V3__create_sessions_table.sql in src/main/resources/db/migration/ with sessions table
-- [ ] T023 Create V4__create_indexes.sql in src/main/resources/db/migration/ with all 21 indexes per data-model.md
-- [ ] T024 Create V5__add_constraints.sql in src/main/resources/db/migration/ with CHECK constraints per data-model.md
-- [ ] T025 Create V6__seed_reference_data.sql in src/main/resources/db/migration/ with account_types seed data
+- [X] T020 Create V1__create_schema.sql in src/main/resources/db/migration/ with users, account_types, accounts tables
+- [X] T021 Create V2__create_transaction_tables.sql in src/main/resources/db/migration/ with transactions, transfer_logs tables
+- [X] T022 Create V3__create_sessions_table.sql in src/main/resources/db/migration/ with sessions table
+- [X] T023 Create V4__create_indexes.sql in src/main/resources/db/migration/ with all 21 indexes per data-model.md
+- [X] T024 Create V5__add_constraints.sql in src/main/resources/db/migration/ with CHECK constraints per data-model.md
+- [X] T025 Create V6__seed_reference_data.sql in src/main/resources/db/migration/ with account_types seed data
 
 ### Domain Entities (JPA)
 
-- [ ] T026 [P] Create AccountType entity in src/main/java/com/oltp/demo/domain/AccountType.java with JPA annotations
-- [ ] T027 [P] Create User entity in src/main/java/com/oltp/demo/domain/User.java with JPA annotations and relationships
-- [ ] T028 [P] Create Account entity in src/main/java/com/oltp/demo/domain/Account.java with @Version for optimistic locking
-- [ ] T029 [P] Create Transaction entity in src/main/java/com/oltp/demo/domain/Transaction.java with correlation_id and status
-- [ ] T030 [P] Create TransferLog entity in src/main/java/com/oltp/demo/domain/TransferLog.java for audit trail
-- [ ] T031 [P] Create Session entity in src/main/java/com/oltp/demo/domain/Session.java for connection pool demos
+- [X] T026 [P] Create AccountType entity in src/main/java/com/oltp/demo/domain/AccountType.java with JPA annotations
+- [X] T027 [P] Create User entity in src/main/java/com/oltp/demo/domain/User.java with JPA annotations and relationships
+- [X] T028 [P] Create Account entity in src/main/java/com/oltp/demo/domain/Account.java with @Version for optimistic locking
+- [X] T029 [P] Create Transaction entity in src/main/java/com/oltp/demo/domain/Transaction.java with correlation_id and status
+- [X] T030 [P] Create TransferLog entity in src/main/java/com/oltp/demo/domain/TransferLog.java for audit trail
+- [X] T031 [P] Create Session entity in src/main/java/com/oltp/demo/domain/Session.java for connection pool demos
 
 ### Repositories (Spring Data JPA)
 
-- [ ] T032 [P] Create AccountTypeRepository in src/main/java/com/oltp/demo/repository/AccountTypeRepository.java
-- [ ] T033 [P] Create UserRepository in src/main/java/com/oltp/demo/repository/UserRepository.java
-- [ ] T034 [P] Create AccountRepository in src/main/java/com/oltp/demo/repository/AccountRepository.java with custom lock methods
-- [ ] T035 [P] Create TransactionRepository in src/main/java/com/oltp/demo/repository/TransactionRepository.java
-- [ ] T036 [P] Create TransferLogRepository in src/main/java/com/oltp/demo/repository/TransferLogRepository.java
-- [ ] T037 [P] Create SessionRepository in src/main/java/com/oltp/demo/repository/SessionRepository.java
+- [X] T032 [P] Create AccountTypeRepository in src/main/java/com/oltp/demo/repository/AccountTypeRepository.java
+- [X] T033 [P] Create UserRepository in src/main/java/com/oltp/demo/repository/UserRepository.java
+- [X] T034 [P] Create AccountRepository in src/main/java/com/oltp/demo/repository/AccountRepository.java with custom lock methods
+- [X] T035 [P] Create TransactionRepository in src/main/java/com/oltp/demo/repository/TransactionRepository.java
+- [X] T036 [P] Create TransferLogRepository in src/main/java/com/oltp/demo/repository/TransferLogRepository.java
+- [X] T037 [P] Create SessionRepository in src/main/java/com/oltp/demo/repository/SessionRepository.java
 
 ### Utilities & Helpers
 
-- [ ] T038 [P] Create CorrelationIdFilter in src/main/java/com/oltp/demo/util/CorrelationIdFilter.java for MDC injection
-- [ ] T039 [P] Create MetricsHelper in src/main/java/com/oltp/demo/util/MetricsHelper.java for custom metrics
-- [ ] T040 [P] Create GlobalExceptionHandler in src/main/java/com/oltp/demo/util/GlobalExceptionHandler.java
+- [X] T038 [P] Create CorrelationIdFilter in src/main/java/com/oltp/demo/util/CorrelationIdFilter.java for MDC injection
+- [X] T039 [P] Create MetricsHelper in src/main/java/com/oltp/demo/util/MetricsHelper.java for custom metrics
+- [X] T040 [P] Create GlobalExceptionHandler in src/main/java/com/oltp/demo/util/GlobalExceptionHandler.java
 
 ### Docker Infrastructure
 
-- [ ] T041 Create docker-compose.yml in infrastructure/docker/ with PostgreSQL, Redis, Prometheus, Grafana, Jaeger services
-- [ ] T042 [P] Create docker-compose.dev.yml in infrastructure/docker/ with development overrides
-- [ ] T043 [P] Create postgresql.conf in infrastructure/docker/postgres/ with tuned PostgreSQL configuration
-- [ ] T044 [P] Create prometheus.yml in infrastructure/docker/prometheus/ with scrape configuration
-- [ ] T045 [P] Create Grafana datasource configuration in infrastructure/docker/grafana/datasources/prometheus.yml
+- [X] T041 Create docker-compose.yml in infrastructure/docker/ with PostgreSQL, Redis, Prometheus, Grafana, Jaeger services
+- [X] T042 [P] Create docker-compose.dev.yml in infrastructure/docker/ with development overrides
+- [X] T043 [P] Create postgresql.conf in infrastructure/docker/postgres/ with tuned PostgreSQL configuration
+- [X] T044 [P] Create prometheus.yml in infrastructure/docker/prometheus/ with scrape configuration
+- [X] T045 [P] Create Grafana datasource configuration in infrastructure/docker/grafana/datasources/prometheus.yml
 
 ### Testing Infrastructure
 
-- [ ] T046 Create BaseIntegrationTest in src/test/java/com/oltp/demo/integration/BaseIntegrationTest.java with Testcontainers setup
-- [ ] T047 [P] Create testcontainers.properties in src/test/resources/ with Testcontainers configuration
-- [ ] T048 [P] Create LayeringArchitectureTest in src/test/java/com/oltp/demo/architecture/LayeringArchitectureTest.java with ArchUnit rules
+- [X] T046 Create BaseIntegrationTest in src/test/java/com/oltp/demo/integration/BaseIntegrationTest.java with Testcontainers setup
+- [X] T047 [P] Create testcontainers.properties in src/test/resources/ with Testcontainers configuration
+- [X] T048 [P] Create LayeringArchitectureTest in src/test/java/com/oltp/demo/architecture/LayeringArchitectureTest.java with ArchUnit rules
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -121,48 +121,48 @@ All paths are from repository root:
 
 #### Atomicity Demonstrations
 
-- [ ] T049 [P] [US1] Create AtomicityDemoService in src/main/java/com/oltp/demo/service/acid/AtomicityDemoService.java
-- [ ] T050 [US1] Implement successful transfer method with @Transactional in AtomicityDemoService
-- [ ] T051 [US1] Implement failed transfer method with rollback demonstration in AtomicityDemoService
-- [ ] T052 [US1] Implement mid-transaction failure simulation in AtomicityDemoService
+- [X] T049 [P] [US1] Create AtomicityDemoService in src/main/java/com/oltp/demo/service/acid/AtomicityDemoService.java
+- [X] T050 [US1] Implement successful transfer method with @Transactional in AtomicityDemoService
+- [X] T051 [US1] Implement failed transfer method with rollback demonstration in AtomicityDemoService
+- [X] T052 [US1] Implement mid-transaction failure simulation in AtomicityDemoService
 
 #### Consistency Demonstrations
 
-- [ ] T053 [P] [US1] Create ConsistencyDemoService in src/main/java/com/oltp/demo/service/acid/ConsistencyDemoService.java
-- [ ] T054 [US1] Implement constraint violation detection (negative balance) in ConsistencyDemoService
-- [ ] T055 [US1] Implement foreign key constraint demonstration in ConsistencyDemoService
-- [ ] T056 [US1] Implement CHECK constraint violation handling in ConsistencyDemoService
+- [X] T053 [P] [US1] Create ConsistencyDemoService in src/main/java/com/oltp/demo/service/acid/ConsistencyDemoService.java
+- [X] T054 [US1] Implement constraint violation detection (negative balance) in ConsistencyDemoService
+- [X] T055 [US1] Implement foreign key constraint demonstration in ConsistencyDemoService
+- [X] T056 [US1] Implement CHECK constraint violation handling in ConsistencyDemoService
 
 #### Isolation Demonstrations
 
-- [ ] T057 [P] [US1] Create IsolationDemoService in src/main/java/com/oltp/demo/service/acid/IsolationDemoService.java
-- [ ] T058 [US1] Implement READ_COMMITTED isolation level demonstration in IsolationDemoService
-- [ ] T059 [US1] Implement REPEATABLE_READ isolation level demonstration in IsolationDemoService
-- [ ] T060 [US1] Implement SERIALIZABLE isolation level demonstration in IsolationDemoService
-- [ ] T061 [US1] Implement concurrent transaction executor with configurable isolation in IsolationDemoService
+- [X] T057 [P] [US1] Create IsolationDemoService in src/main/java/com/oltp/demo/service/acid/IsolationDemoService.java
+- [X] T058 [US1] Implement READ_COMMITTED isolation level demonstration in IsolationDemoService
+- [X] T059 [US1] Implement REPEATABLE_READ isolation level demonstration in IsolationDemoService
+- [X] T060 [US1] Implement SERIALIZABLE isolation level demonstration in IsolationDemoService
+- [X] T061 [US1] Implement concurrent transaction executor with configurable isolation in IsolationDemoService
 
 #### Durability Demonstrations
 
-- [ ] T062 [P] [US1] Create DurabilityDemoService in src/main/java/com/oltp/demo/service/acid/DurabilityDemoService.java
-- [ ] T063 [US1] Implement transfer log recording for durability verification in DurabilityDemoService
-- [ ] T064 [US1] Implement crash recovery verification query in DurabilityDemoService
-- [ ] T065 [US1] Implement committed transaction lookup by correlation ID in DurabilityDemoService
+- [X] T062 [P] [US1] Create DurabilityDemoService in src/main/java/com/oltp/demo/service/acid/DurabilityDemoService.java
+- [X] T063 [US1] Implement transfer log recording for durability verification in DurabilityDemoService
+- [X] T064 [US1] Implement crash recovery verification query in DurabilityDemoService
+- [X] T065 [US1] Implement committed transaction lookup by correlation ID in DurabilityDemoService
 
 #### REST API Endpoints
 
-- [ ] T066 [P] [US1] Create AcidDemoController in src/main/java/com/oltp/demo/controller/AcidDemoController.java
-- [ ] T067 [US1] Implement POST /api/demos/acid/atomicity/transfer endpoint in AcidDemoController
-- [ ] T068 [US1] Implement POST /api/demos/acid/atomicity/fail-mid-transaction endpoint in AcidDemoController
-- [ ] T069 [US1] Implement POST /api/demos/acid/consistency/enforce-constraints endpoint in AcidDemoController
-- [ ] T070 [US1] Implement POST /api/demos/acid/isolation/concurrent-transfers endpoint in AcidDemoController
-- [ ] T071 [US1] Implement GET /api/demos/acid/durability/crash-recovery endpoint in AcidDemoController
+- [X] T066 [P] [US1] Create AcidDemoController in src/main/java/com/oltp/demo/controller/AcidDemoController.java
+- [X] T067 [US1] Implement POST /api/demos/acid/atomicity/transfer endpoint in AcidDemoController
+- [X] T068 [US1] Implement POST /api/demos/acid/atomicity/fail-mid-transaction endpoint in AcidDemoController
+- [X] T069 [US1] Implement POST /api/demos/acid/consistency/enforce-constraints endpoint in AcidDemoController
+- [X] T070 [US1] Implement POST /api/demos/acid/isolation/concurrent-transfers endpoint in AcidDemoController
+- [X] T071 [US1] Implement GET /api/demos/acid/durability/crash-recovery endpoint in AcidDemoController
 
 #### Integration Tests
 
-- [ ] T072 [P] [US1] Create AtomicityIntegrationTest in src/test/java/com/oltp/demo/integration/acid/AtomicityIntegrationTest.java
-- [ ] T073 [P] [US1] Create ConsistencyIntegrationTest in src/test/java/com/oltp/demo/integration/acid/ConsistencyIntegrationTest.java
-- [ ] T074 [P] [US1] Create IsolationIntegrationTest in src/test/java/com/oltp/demo/integration/acid/IsolationIntegrationTest.java
-- [ ] T075 [P] [US1] Create DurabilityIntegrationTest in src/test/java/com/oltp/demo/integration/acid/DurabilityIntegrationTest.java with container restart
+- [X] T072 [P] [US1] Create AtomicityIntegrationTest in src/test/java/com/oltp/demo/integration/acid/AtomicityIntegrationTest.java
+- [X] T073 [P] [US1] Create ConsistencyIntegrationTest in src/test/java/com/oltp/demo/integration/acid/ConsistencyIntegrationTest.java
+- [X] T074 [P] [US1] Create IsolationIntegrationTest in src/test/java/com/oltp/demo/integration/acid/IsolationIntegrationTest.java
+- [X] T075 [P] [US1] Create DurabilityIntegrationTest in src/test/java/com/oltp/demo/integration/acid/DurabilityIntegrationTest.java with container restart
 
 #### Documentation
 
