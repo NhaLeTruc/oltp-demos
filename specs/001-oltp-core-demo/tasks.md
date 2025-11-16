@@ -466,10 +466,10 @@ All paths are from repository root:
 
 ### Architecture Decision Records
 
-- [ ] T207 [P] Create 001-java-spring-boot.md in docs/architecture/adr/ documenting Java/Spring Boot choice
-- [ ] T208 [P] Create 002-postgresql-over-mysql.md in docs/architecture/adr/ documenting database choice
-- [ ] T209 [P] Create 003-hikaricp-connection-pooling.md in docs/architecture/adr/ documenting connection pool choice
-- [ ] T210 [P] Create 004-observability-stack.md in docs/architecture/adr/ documenting Micrometer/Prometheus/Grafana choice
+- [X] T207 [P] Create 001-java-spring-boot.md in docs/architecture/adr/ documenting Java/Spring Boot choice
+- [X] T208 [P] Create 002-postgresql-over-mysql.md in docs/architecture/adr/ documenting database choice
+- [X] T209 [P] Create 003-hikaricp-connection-pooling.md in docs/architecture/adr/ documenting connection pool choice
+- [X] T210 [P] Create 004-observability-stack.md in docs/architecture/adr/ documenting Micrometer/Prometheus/Grafana choice
 
 ### Architecture Diagrams
 
