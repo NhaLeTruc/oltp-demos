@@ -364,10 +364,10 @@ All paths are from repository root:
 
 #### Integration Tests
 
-- [ ] T163 [P] [US4] Create ObservabilityIntegrationTest in src/test/java/com/oltp/demo/integration/observability/ObservabilityIntegrationTest.java
-- [ ] T164 [US4] Test correlation ID propagation in ObservabilityIntegrationTest
-- [ ] T165 [US4] Test metrics emission to Prometheus in ObservabilityIntegrationTest
-- [ ] T166 [US4] Test trace creation in OpenTelemetry in ObservabilityIntegrationTest
+- [X] T163 [P] [US4] Create ObservabilityIntegrationTest in src/test/java/com/oltp/demo/integration/observability/ObservabilityIntegrationTest.java
+- [X] T164 [US4] Test correlation ID propagation in ObservabilityIntegrationTest
+- [X] T165 [US4] Test metrics emission to Prometheus in ObservabilityIntegrationTest
+- [X] T166 [US4] Test trace creation in OpenTelemetry in ObservabilityIntegrationTest
 
 #### Documentation
 
